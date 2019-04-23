@@ -1,0 +1,36 @@
+{
+    "name": "belca/file",
+    "description": "The Belca component. The File for Dios CMS",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Oleg Dmitrochenko",
+            "email": "info@dios-studio.by"
+        }
+    ],
+    "requires": {
+       "php": ">=7.0",
+       "illuminate/database": "5.5.*",
+       "illuminate/support": "5.5.*",
+       "belca/repository": "dev-master",
+       "belca/filehandler": "dev-master",
+       "belca/gename": "dev-master",
+       "belca/support": "dev-master",
+       "belca/classextender": "dev-master",
+       "tucker-eric/eloquentfilter": "~1.0"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Belca\\File\\FileServiceProvider"
+            ]
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Belca\\File\\": "src"
+        }
+    },
+    "minimum-stability": "dev"
+}
