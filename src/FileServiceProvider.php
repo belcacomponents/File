@@ -45,6 +45,10 @@ class FileServiceProvider extends ServiceProvider
             __DIR__.'/../config/file.php', 'file'
         );
 
+        $this->mergeConfigFrom(
+            __DIR__.'/../config/filehandler.php', 'filehandler'
+        );
+
         $this->app->singleton(FileRepository::class, config('file.repository'));
 
         // TODO должен возвращать FileHandler, чтобы в него можно было добавлять

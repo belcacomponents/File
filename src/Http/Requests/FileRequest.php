@@ -33,6 +33,7 @@ class FileRequest extends FormRequest
             case 'POST': {
                 return [
                     'title' => 'required'
+                    // TODO проверка на используемые диски. Диски из конфига, если заданы
                 ];
             }
             case 'PUT':

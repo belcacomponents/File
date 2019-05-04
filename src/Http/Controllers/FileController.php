@@ -110,31 +110,38 @@ class FileController implements FileControllerInterface
         ];
 
         // TODO: Директорию (диск) для сохранения можно будет выбирать при загрузке файла из конфигурации filesystems
-        $directory = Storage::disk('public')->getAdapter()->getPathPrefix();
+        $disk = 'public';
+        $directory = Storage::disk($disk)->getAdapter()->getPathPrefix();
 
         // Генерируем новое имя файла
         $gename = new GeName();
         // TODO в конфигурацию, причем для каждого драйвера можно свой тип
         // или вынести отсюда и использовать трейт или метод с трейтом
-        $gename->setPattern('/files/{mime<value:group>}/{date<format:Y-m-d>}//{date<format:Y>}/{filename<length:25>}.{extension}');
+        $gename->setPattern('{mime<value:group>}/{date<format:Y-m-d>}/{string<length:25>}.{extension}');
         $gename->setInitialData([
-            'mime' => explode('/', $fileinfo['mime'])[0],
+            'mime' => $fileinfo['mime'],
             'extension' => $fileinfo['extension'],
-            'date' => date("Y-m-d"),
-            'filename' => str_random(25),
+            'filename' => $fileinfo['filename'],
         ]);
         $gename->setDirectory($directory);
-        $filename = $gename->generateName(); // TODO еще нужно задать метод генерации
-        dd($filename);
-        $filename = 'filename'; // TODO сгенерировать новое имя файла для сохранения,
-        // в зависимости от типа, расширения, имени файла, настроек.
+        $filename = $gename->generateName();
 
         $fileHandler = new FileHandler();
+        $fileHandler->setHandlers(config('filehandler.handlers'));
+
+        // TODO должны быть заданы настройки обработчиков: список названий и классов
+        // Настройки задаются из файлов конфигурации PHP, но должна быть возможность
+        // замены этих настроек или слияния другими параметрами, например,
+        // заданными сторонними конфигураторами.
+
+        // Настраиваем и запускаем обработчик оригинального файла
+        // Конфигурация хранится в настройках config/filehandler.php
+        $fileHandler->setOriginalFileHandlingRules(config('filehandler.original_file_handling_rules'));
+        $fileHandler->setOriginalFileHandlingScript(config('filehandler.original_file_handling_scripts'));
+        $fileHandler->setExecutableScriptHandlingOriginalFile('user-device');
+
         $fileHandler->setOriginalFile($request->file('file')->getPathName(), $fileinfo);
         $fileHandler->setDirectory($directory);
-
-
-
 
         // Если файл не сохранен - вернет false и вызовем переадресацию
         // с отображением ошибки на экране.
@@ -142,9 +149,31 @@ class FileController implements FileControllerInterface
             return redirect()->route($this->redirects['store'], ['file' => $fileinfo])->with('status', 'notSaved');
         }
 
-        // Получаем информацию о файле и сохраняем ее в БД.
-        $fileInfo = $fileHandler->getFileInfo();
-        $file = $this->files->createWithGuardedFields(array_merge($request->input(), $fileInfo));
+        // Запускаем обработка оригинального файла по правилам указанным выше
+        $fileHandler->handleOriginalFile($request->input('original_file_handler_parameters'));
+
+        // Пример входных данных с формы
+        $ofhp = [
+            'handlers' => [
+                'finfo' => [
+                    'color'
+                ]
+            ]
+        ];
+
+        // Получаем информацию об оригинальном файле и сохраняем ее в БД.
+        $fileHandler->setBasicPropertyNames();
+        $basicFileinfo = $fileHandler->getBasicFileProperties();
+        $additionalFileinfo = $fileHandler->getAdditionalFileProperties();
+
+        // Информация для таблицы файлов
+        $systemInfo = [
+            'disk' => $disk,
+            'author_id' => 1,
+        ];
+
+        dd($basicFileinfo);
+        $file = $this->files->createWithGuardedFields(array_merge($request->input(), $systemInfo, $basicFileinfo));
 
         // Запускаем обработку файла.
         // Конфигурация задается из файла config/filehandler.php и настройки
@@ -153,9 +182,10 @@ class FileController implements FileControllerInterface
         // в виде массива с именем handler_parameters.<package>.*, где
         // package - название пакета, принимаемое и обрабатываемое
         // в методе handle.
-        $fileHandler->setHandlerConfig(config('filehandler'));
+        $fileHandler->setHandlerConfig(config('filehandler')); // TODO это общая конфигурация
+        $fileHandler->setExecutableScriptHandlingFile('user-device');
         $fileHandler->handle($request->input('handler_parameters'));
-        $files = $fileHandler->getSavedFiles(true);
+        $files = $fileHandler->getAllInfo();
 
         if (isset($files) && is_array($files)) {
             $this->files->createModifications($file->id, $files);
