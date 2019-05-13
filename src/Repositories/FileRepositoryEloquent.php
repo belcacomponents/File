@@ -42,6 +42,11 @@ class FileRepositoryEloquent extends BaseRepository implements FileRepositoryInt
         // строить свои условия
     }
 
+    public function sort($inputs = [])
+    {
+        return $this->model;
+    }
+
     /**
      * Сохраняет переданные значения.
      *
@@ -97,7 +102,7 @@ class FileRepositoryEloquent extends BaseRepository implements FileRepositoryInt
 
     }
 
-    public function getModifications($id)
+    public function getModifications($id) // TODO можем вторым параметром задать класс обертки - оборачивающий данные в объект
     {
 
     }

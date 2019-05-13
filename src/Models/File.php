@@ -17,6 +17,10 @@ class File extends Model
         'category_id'
     ];
 
+    protected $casts = [
+        'options' => 'array',
+    ];
+
     // TODO скрыты все кроме стандартных полей title description path
     //protected $hidden = ['slug', 'name', 'published'];
 

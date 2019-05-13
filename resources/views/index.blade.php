@@ -1,59 +1,59 @@
-@extends('belca-defaultsystemtheme::system.admin.app')
-
-{{-- Шаблон для темы по умолчанию. Должен расширяться вставкой секциями или пушем --}}
+{{-- /resources/views/index.blade.php --}}
+{{-- Страница со списком файлов --}}
+{{-- TODO Шаблон для темы по умолчанию. Должен расширяться вставкой секциями или пушем --}}
+@extends(config('systemtheme.app'))
 
 @section('content')
-  <h1>Файлы</h1>
+  @component(config('systemtheme.workspace'))
+    {{-- Breadcrumbs --}}
+    @include(config('systemtheme.breadcrumbs'), ['breadcrumbs' => [['link' => '/system', 'label' => 'Главная']]])
 
-  <div uk-margin>
-    <a href="{{ route('files.create') }}" class="uk-button uk-button-primary">Новый файл</a>
-    <a href="#" class="uk-button uk-button-default">Мультизагрузка</a>
-    Кнопки Загрузка / Загрузка мульти / Пульти (добавлять/расширятьб/заменить)
-  </div>
+    {{-- Heading --}}
+    @component(config('systemtheme.heading'))
+      Файлы
+    @endcomponent
 
-  <form action="{{ route('files.index') }}" method="get">
-    <div class="uk-inline uk-width-1-2@s">
-      <button type="submit" class="uk-form-icon uk-form-icon-flip" href="" uk-icon="icon: search"></button>
-      <input name="title" value="{{ old('title') }}" class="uk-input" placeholder="Поиск файлов по названию">
+    {{-- Form --}}
+    @component(config('systemtheme.form'), ['attributes' => ['action' => route('files.index'), 'method' => 'get']])
+      {{-- Control panel --}}
+      @component(config('systemtheme.control-panel'))
+        @component(config('systemtheme.buttonlink'), ['styleModifier' => 'primary', 'attributes' => ['href' => route('files.create')]])
+          Новый файл
+        @endcomponent
+
+        {{--
+        @component(config('systemtheme.button'), ['attributes' => ['type' => 'submit']])
+          Мультизагрузка
+        @endcomponent
+        --}}
+
+        {{-- TODO расширение: добавление кнопок или полная замена --}}
+
+        @slot('additional')
+          <div class="uk-inline uk-width-1-1 uk-width-1-2@m">
+            <button type="submit" class="uk-form-icon uk-form-icon-flip" href="" uk-icon="icon: search"></button>
+            <input name="title" value="{{ old('title', $title ?? '') }}" class="uk-input" placeholder="Поиск файлов по названию">
+          </div>
+
+          <button class="uk-button uk-button-default" type="submit">Поиск</button>
+        @endslot
+
+        {{--
+        @slot('hidden')
+          Дополнительные элементы фильтрации файлов
+        @endslot
+        --}}
+      @endcomponent
+    @endcomponent
+
+    {{-- Files --}}
+    <div class="uk-margin">
+      @include(config('file.list_component'), ['files' => $files])
     </div>
 
-    Фильтрация (можно добавлять/расширять или заменить)
-  </form>
-
-  <div class="">
-    Контент (можно заменить шаблон отображения или дополнить блоки отображения/заменить)
-
-    @if (isset($files) && $files->count() > 0)
-      @foreach ($files as $item)
-        <div class="">
-          <a href="{{ route('files.edit', $item->id) }}">{{ $item->title }}</a>
-        </div>
-      @endforeach
-    @endif
-  </div>
-
-
-  <div class="">
-    Навигация (заменить)
-
-    <ul class="uk-pagination" uk-margin>
-        <li><a href="#"><span uk-pagination-previous></span></a></li>
-        <li><a href="#">1</a></li>
-        <li class="uk-disabled"><span>...</span></li>
-        <li><a href="#">4</a></li>
-        <li><a href="#">5</a></li>
-        <li><a href="#">6</a></li>
-        <li class="uk-active"><span>7</span></li>
-        <li><a href="#">8</a></li>
-        <li><a href="#">9</a></li>
-        <li><a href="#">10</a></li>
-        <li class="uk-disabled"><span>...</span></li>
-        <li><a href="#">20</a></li>
-        <li><a href="#"><span uk-pagination-next></span></a></li>
-    </ul>
-
-    Дополнить
-  </div>
-
-  Может предоставляться как цельная страница или как компонент страницы (часть страницы)
+    {{-- Pagination --}}
+    <div class="uk-margin">
+      {{ $files->links(config('systemtheme.pagination')) }}
+    </div>
+  @endcomponent
 @endsection

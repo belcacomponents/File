@@ -45,7 +45,9 @@ class FileController implements FileControllerInterface
      */
     protected $redirectConfig = [
         'store' => 'file.store_redirect',
+        'store_error' => 'file.store_error_redirect',
         'update' => 'file.update_redirect',
+        'update_error' => 'file.update_redirect',
         'destory' => 'file.destory_redirect',
     ];
 
@@ -56,6 +58,10 @@ class FileController implements FileControllerInterface
      */
     protected $redirects = [];
 
+    protected $disk = 'public';
+
+    protected $filenamePattern;
+
     public function __construct(FileRepository $files)
     {
         $this->files = $files;
@@ -63,6 +69,8 @@ class FileController implements FileControllerInterface
         $this->views = Config::getConfigArrayByConfigKeys($this->viewConfig);
 
         $this->redirects = Config::getConfigArrayByConfigKeys($this->redirectConfig);
+
+        $this->filenamePattern = config('file.filename_pattern');
     }
 
     /**
@@ -73,7 +81,9 @@ class FileController implements FileControllerInterface
      */
     public function index(Request $request)
     {
-        $files = $this->files->filter($request->input())->paginate();
+        // TODO Должна быть сортировка, фильтрация, поиск по названю, поиск по другим критериям
+        // По умолчанию сортировка latest
+        $files = $this->files->filter($request->input())/*->sort($request->input())*/->latest()->paginate(20);
 
         return view($this->views['index'] ?? 'belca-file::index', compact('files'));
     }
@@ -110,14 +120,12 @@ class FileController implements FileControllerInterface
         ];
 
         // TODO: Директорию (диск) для сохранения можно будет выбирать при загрузке файла из конфигурации filesystems
-        $disk = 'public';
+        $disk = $this->disk;
         $directory = Storage::disk($disk)->getAdapter()->getPathPrefix();
 
         // Генерируем новое имя файла
         $gename = new GeName();
-        // TODO в конфигурацию, причем для каждого драйвера можно свой тип
-        // или вынести отсюда и использовать трейт или метод с трейтом
-        $gename->setPattern('{mime<value:group>}/{date<format:Y-m-d>}/{string<length:25>}.{extension}');
+        $gename->setPattern($this->filenamePattern);
         $gename->setInitialData([
             'mime' => $fileinfo['mime'],
             'extension' => $fileinfo['extension'],
@@ -126,72 +134,48 @@ class FileController implements FileControllerInterface
         $gename->setDirectory($directory);
         $filename = $gename->generateName();
 
-        $fileHandler = new FileHandler();
-        $fileHandler->setHandlers(config('filehandler.handlers'));
-
-        // TODO должны быть заданы настройки обработчиков: список названий и классов
-        // Настройки задаются из файлов конфигурации PHP, но должна быть возможность
-        // замены этих настроек или слияния другими параметрами, например,
-        // заданными сторонними конфигураторами.
-
-        // Настраиваем и запускаем обработчик оригинального файла
         // Конфигурация хранится в настройках config/filehandler.php
-        $fileHandler->setOriginalFileHandlingRules(config('filehandler.original_file_handling_rules'));
-        $fileHandler->setOriginalFileHandlingScript(config('filehandler.original_file_handling_scripts'));
-        $fileHandler->setExecutableScriptHandlingOriginalFile('user-device');
-
+        $fileHandler = new FileHandler(config('filehandler.handlers'), config('filehandler.rules'), config('filehandler.scripts'));
         $fileHandler->setOriginalFile($request->file('file')->getPathName(), $fileinfo);
         $fileHandler->setDirectory($directory);
+        $fileHandler->setHandlingScriptByScriptName('user-device');
 
         // Если файл не сохранен - вернет false и вызовем переадресацию
         // с отображением ошибки на экране.
         if (! $fileHandler->save($filename)) {
-            return redirect()->route($this->redirects['store'], ['file' => $fileinfo])->with('status', 'notSaved');
+            return redirect()->route($this->redirects['store_error'])->with(['status' => 'notSaved', 'file' => $fileinfo]);
         }
 
-        // Запускаем обработка оригинального файла по правилам указанным выше
-        $fileHandler->handleOriginalFile($request->input('original_file_handler_parameters'));
-
-        // Пример входных данных с формы
-        $ofhp = [
-            'handlers' => [
-                'finfo' => [
-                    'color'
-                ]
-            ]
-        ];
-
-        // Получаем информацию об оригинальном файле и сохраняем ее в БД.
-        $fileHandler->setBasicPropertyNames();
-        $basicFileinfo = $fileHandler->getBasicFileProperties();
-        $additionalFileinfo = $fileHandler->getAdditionalFileProperties();
-
-        // Информация для таблицы файлов
-        $systemInfo = [
-            'disk' => $disk,
-            'author_id' => 1,
-        ];
-
-        dd($basicFileinfo);
-        $file = $this->files->createWithGuardedFields(array_merge($request->input(), $systemInfo, $basicFileinfo));
-
-        // Запускаем обработку файла.
+        // Со страницы формы может быть передан измененный вариант обработки скрипта
         // Конфигурация задается из файла config/filehandler.php и настройки
         // задаются вручную. Каждый ключ массива соответствует пакету обработки.
         // Настройки обработки файлов переопределяются или задаются с формы
         // в виде массива с именем handler_parameters.<package>.*, где
         // package - название пакета, принимаемое и обрабатываемое
         // в методе handle.
-        $fileHandler->setHandlerConfig(config('filehandler')); // TODO это общая конфигурация
-        $fileHandler->setExecutableScriptHandlingFile('user-device');
         $fileHandler->handle($request->input('handler_parameters'));
-        $files = $fileHandler->getAllInfo();
+
+        // Получаем информацию об оригинальном файле и сохраняем ее в БД.
+        $basicFileinfo = $fileHandler->getBasicFileProperties();
+        $additionalFileinfo = $fileHandler->getAdditionalFileProperties();
+        $files = $fileHandler->getFilePaths();
+        $basicPropertiesModifications = $fileHandler->getBasicProperties();
+        $additinalPropertiesModifications = $fileHandler->getAdditionalProperties();
+
+        // Информация для таблицы файлов
+        $systemInfo = [
+            'disk' => $disk,
+            'author_id' => 1,
+            'path' => $filename,
+        ];
+
+        $file = $this->files->createWithGuardedFields(array_merge($request->input(), $fileinfo, $systemInfo, $basicFileinfo, ['options' => $additionalFileinfo]));
 
         if (isset($files) && is_array($files)) {
             $this->files->createModifications($file->id, $files);
         }
 
-        return redirect()->route($this->redirects['store'], ['file' => $file->toArray()])->with('status', 'saved');
+        return redirect()->route($this->redirects['store'], $file->id)->with(['status' => 'saved', 'file' => $file]);
     }
 
     /**
@@ -232,7 +216,7 @@ class FileController implements FileControllerInterface
      */
     public function update(FileRequest $request, $id)
     {
-        $file = $this->files->update($request, $id)->toArray();
+        $file = $this->files->update($request->input(), $id);
 
         return redirect()->route($this->redirects['update'], compact('file'))->with('status', 'updated');
     }

@@ -10,12 +10,38 @@ use Belca\FileHandler\FileHandlerAdapterAbstract;
  */
 class FInfoHandler extends FileHandlerAdapterAbstract
 {
+    public function __construct($rules = null, $scripts = null)
+    {
+        if (! empty($rules['handlers'])) {
+            foreach ($rules['handlers'] as $key => $className) {
+                Fileinfo::addClass($className);
+            }
+        }
+    }
+
+    public static function mergeRules($method, ...$rules)
+    {
+
+    }
+
+    /**
+     * Объединяет переданные скрипты указанным методом слияния и возвращает их.
+     *
+     * @param  string $method
+     * @param  mixed  $scripts
+     * @return mixed
+     */
+    public static function mergeScripts($method, ...$scripts)
+    {
+
+    }
+
     /**
      * Возвращает тип обработчика: порождающий, извлекающий или модифицирующий.
      *
      * @var string
      */
-    public static getHandlerType()
+    public static function getHandlerType()
     {
         return self::EXTRACTING;
     }
@@ -29,11 +55,7 @@ class FInfoHandler extends FileHandlerAdapterAbstract
      */
     public function handle($script = null)
     {
-        // TODO в конструкторе должна пройти инициализация обрабатываемых классов
-        // Здесь должен произойти только вызов и обработка, сохранение ответа и возврат
-        Fileinfo::file($this->file);
-
-        // в инфо должна быть возвращена информация
-
+        // Если не указаны возвращаемые поля, то вернуть все поля, если иное не определено в настройках.
+        $this->info = Fileinfo::file($this->getFile());
     }
 }
