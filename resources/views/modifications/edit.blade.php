@@ -1,29 +1,28 @@
-{{-- /resources/views/edit.blade.php --}}
-{{-- Страница правки информации о файле --}}
-{{-- TODO Должен иметь возможность расширения c помощью секций, компонентов и стеков --}}
+{{-- /resources/views/modifications/edit.blade.php --}}
+{{-- Страница правки информации о модификации файла --}}
 @extends(config('systemtheme.app'))
 
-@section('title', 'Правка файла: '.$file->title.' ['.$file->id.']')
+@section('title', 'Правка модификации файла: '.$file->title.' ['.$file->id.']')
 
 @section('content')
   @component(config('systemtheme.workspace'))
     {{-- Breadcrumbs --}}
-    @include(config('systemtheme.breadcrumbs'), ['breadcrumbs' => [['link' => '/system', 'label' => 'Главная'], ['link' => route('files.index'), 'label' => 'Файлы'], ['label' => 'Правка файла']]])
+    @include(config('systemtheme.breadcrumbs'), ['breadcrumbs' => [['link' => '/system', 'label' => 'Главная'], ['link' => route('files.index'), 'label' => 'Файлы'], ['link' => route('files.mods.index', empty($file->parent_id) ? [] : ['id' => $file->parent_id]), 'label' => 'Модификации'], ['label' => 'Правка модификации файла']]])
 
     {{-- Container --}}
     @component(config('systemtheme.container'))
 
       {{-- Heading --}}
       @component(config('systemtheme.heading'))
-        Правка файла: {{ $file->title }}
+        Правка модификации файла: {{ $file->title }}
       @endcomponent
 
       {{-- Delete form  --}}
-      @component(config('systemtheme.form'), ['crud' => 'delete','attributes' => ['action' => route('files.destroy', $file->id), 'id' => 'deleteForm']])
+      @component(config('systemtheme.form'), ['crud' => 'delete','attributes' => ['action' => route('files.mods.destroy', $file->id), 'id' => 'deleteForm']])
       @endcomponent
 
       {{-- Form --}}
-      @component(config('systemtheme.form'), ['crud' => 'put','attributes' => ['action' => route('files.update', $file->id)]])
+      @component(config('systemtheme.form'), ['crud' => 'put','attributes' => ['action' => route('files.mods.update', $file->id)]])
 
         {{-- Control panel --}}
         @component(config('systemtheme.control-panel'))
@@ -31,23 +30,39 @@
             Сохранить
           @endcomponent
 
+          @if ($file->parent_id == 0)
+            @component(config('systemtheme.buttonlink'), ['attributes' => ['href' => route('files.mods.create', $file->id)]])
+              Новая мод-ция
+            @endcomponent
+          @endif
+
+          @component(config('systemtheme.buttonlink'), ['attributes' => ['href' => route('files.mods.create', $file->id)]])
+            Заменить мод-цию
+          @endcomponent
+
           @component(config('systemtheme.buttonlink'), ['attributes' => ['href' => route('files.show', $file->id), 'target' => '_blank']])
-            Открыть файл
+            Открыть
           @endcomponent
 
           @component(config('systemtheme.button'), ['styleModifier' => 'danger', 'attributes' => ['form' => 'deleteForm', 'type' => 'submit']])
             Удалить
           @endcomponent
 
-          @component(config('systemtheme.buttonlink'), ['attributes' => ['href' => $back ?? route('files.index')]])
+          @component(config('systemtheme.buttonlink'), ['attributes' => ['href' => $back ?? route('files.mods.index')]])
             Назад
           @endcomponent
 
           {{-- TODO рашсиряется / заменяется через section и внутренние элементы --}}
         @endcomponent
 
-        {{-- Alerts --}}
-        @include(config('file.alerts_component'))
+        {{-- Alert --}}
+        @if (session('status') == 'updated')
+          <div class="uk-alert-success" uk-alert>
+            <a class="uk-alert-close" uk-close></a>
+            <h3>Обновлено</h3>
+            <p>Информация о файле успешно обновлена.</p>
+          </div>
+        @endif
 
         {{-- Zones --}}
         @component(config('systemtheme.zones'))
@@ -58,22 +73,22 @@
               {{-- Group - Main --}}
               @component(config('systemtheme.group'))
                 @component(config('systemtheme.heading'), ['type' => 'h2'])
-                  @lang('belca-file::files.file_information')
+                  Сведения о файле
                 @endcomponent
 
                 {{-- Input - Title --}}
-                @component(config('systemtheme.textinput'), ['attributes' => ['name' => 'title', 'value' => $file->title, 'placeholder' => __('belca-file::files.filename')]])
+                @component(config('systemtheme.textinput'), ['attributes' => ['name' => 'title', 'value' => $file->title, 'placeholder' => 'Заголовок файла']])
                   @slot('label')
-                    @lang('belca-file::files.filename')
+                    Заголовок файла
                   @endslot
                 @endcomponent
 
                 {{-- TODO дополняется, например, категория, диск --}}
 
                 {{-- Textarea - Description --}}
-                @component(config('systemtheme.multilineinput'), ['attributes' => ['name' => 'description', 'placeholder' => __('belca-file::files.file_description')]])
+                @component(config('systemtheme.multilineinput'), ['attributes' => ['name' => 'description', 'placeholder' => 'Описание файла']])
                   @slot('label')
-                    @lang('belca-file::files.file_description')
+                    Описание файла
                   @endslot
 
                   {{ $file->description ?? '' }}
@@ -224,16 +239,7 @@
                   {{ $file->mime }}
                 @endcomponent
 
-                {{-- Modifications --}}
-                @component(config('systemtheme.staticvalue'))
-                  @slot('label')
-                    Модификаций:
-                  @endslot
-
-                  {{ $file->modifications()->count() }}
-                @endcomponent
               @endcomponent
-
             @endcomponent
           @endcomponent
         @endcomponent

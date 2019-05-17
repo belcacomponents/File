@@ -5,7 +5,7 @@ namespace Belca\File\Http\Requests;
 use Belca\File\Contracts\FileRequestInterface;
 use Illuminate\Foundation\Http\FormRequest;
 
-class FileRequest extends FormRequest
+class FileModificationRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -32,25 +32,18 @@ class FileRequest extends FormRequest
             }
             case 'POST': {
                 return [
-                    'file' => 'required|file', // TODO размер файла и формат файла
-                    'title' => 'required|string'
+                    'title' => 'required'
                     // TODO проверка на используемые диски. Диски из конфига, если заданы
-                    //
                 ];
             }
             case 'PUT':
             case 'PATCH': {
                 return [
-                    'title' => 'required|string'
+                    'title' => 'required'
                 ];
             }
             default:
                 break;
         }
-    }
-
-    public function messages()
-    {
-        return trans('belca-file::validation');
     }
 }

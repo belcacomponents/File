@@ -184,7 +184,7 @@ class CreateFilesTable extends Migration
            * проверка и значение по умолчанию, если отсутствие значения вызовет
            * ошибку или некорректное отображение данных.
            */
-          $table->string('options')->nullable();
+          $table->text('options')->nullable();
         });
     }
 

@@ -27,6 +27,11 @@ class FileRepositoryEloquent extends BaseRepository implements FileRepositoryInt
         return BaseFile::class;
     }
 
+    public function original()
+    {
+        return $this->model->original();
+    }
+
     /**
      * Фильтрует информацию по указанным критериям.
      *
@@ -96,20 +101,52 @@ class FileRepositoryEloquent extends BaseRepository implements FileRepositoryInt
         }
     }
 
-
-    public function deleteModifications($id, $except = true, $modifications = [])
+    /**
+     * Удаляет экземпляр файла вместе с модификациями.
+     *
+     * @param  ineger  $id
+     * @return integer
+     */
+    public function deleteWithModifications($id)
     {
+        $file = $this->model->find($id);
 
+        $deleted = $file->modifications()->delete();
+
+        $file->delete();
+
+        return ++$deleted;
     }
 
-    public function getModifications($id) // TODO можем вторым параметром задать класс обертки - оборачивающий данные в объект
+    /**
+     * Возвращает список модификаций указанного экземпляра файла.
+     *
+     * @param  integer $id
+     * @return Collection
+     */
+    public function getModifications($id)
     {
-
+        // TODO можем вторым параметром задать класс обертки - оборачивающий данные в объект
+        return $this->model->whereParentId($id)->get();
     }
 
-    public function findWithModifications($id, $column)
+    /**
+     * Возвращает экземпляр файла и его модификации в виде одно массива.
+     *
+     * @param  integer $id
+     * @return array
+     */
+    public function findWithModifications($id)
     {
+        $files = [];
+        $file = $this->model->original()->find($id);
 
+        if (! empty($file)) {
+            $files[] = $file;
+            $files = array_merge($files, $this->getModifications($file->id)->all());
+        }
+
+        return $files;
     }
 
     // TODO удаление связанных данных: действите: удалить, опусташить, каждому свое

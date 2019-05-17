@@ -17,6 +17,7 @@ class FileServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+        $this->loadTranslationsFrom(__DIR__.'/../resources/translations', 'belca-file');
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'belca-file');
         $this->loadRoutesFrom(__DIR__.'/../routes/files.php');
 

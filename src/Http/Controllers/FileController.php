@@ -48,7 +48,8 @@ class FileController implements FileControllerInterface
         'store_error' => 'file.store_error_redirect',
         'update' => 'file.update_redirect',
         'update_error' => 'file.update_redirect',
-        'destory' => 'file.destory_redirect',
+        'destroy' => 'file.destroy_redirect',
+        'destroy_error' => 'file.destroy_error_redirect',
     ];
 
     /**
@@ -74,7 +75,8 @@ class FileController implements FileControllerInterface
     }
 
     /**
-     * Отображает страницу с файлами и форму для фильтрации результата
+     * Отображает страницу с оригинальными файлами и форму для фильтрации
+     * результата.
      *
      * @param  mixed $request Условия фильтрации
      * @return View
@@ -83,7 +85,7 @@ class FileController implements FileControllerInterface
     {
         // TODO Должна быть сортировка, фильтрация, поиск по названю, поиск по другим критериям
         // По умолчанию сортировка latest
-        $files = $this->files->filter($request->input())/*->sort($request->input())*/->latest()->paginate(20);
+        $files = $this->files->original()->filter($request->input())/*->sort($request->input())*/->latest()->paginate(20);
 
         return view($this->views['index'] ?? 'belca-file::index', compact('files'));
     }
@@ -103,9 +105,7 @@ class FileController implements FileControllerInterface
      *
      * Вызывает обработку файла и сохраняет информацию
      * в БД. Если при обработке файла были получены модификации или изменена
-     * информация об оригинальном файле, то эти данные также вносятся в БД.
-     * После сохранения информации вызывается перенаправление на другую страницу
-     * и передается статус о действии.
+     * информация об оригинальном файле, то эти данные также сохраняются в БД.
      *
      * @param  FileRequest   $request    Данные формы и загружаемый файл
      * @return Illuminate\Http\RedirectResponse
@@ -140,10 +140,8 @@ class FileController implements FileControllerInterface
         $fileHandler->setDirectory($directory);
         $fileHandler->setHandlingScriptByScriptName('user-device');
 
-        // Если файл не сохранен - вернет false и вызовем переадресацию
-        // с отображением ошибки на экране.
         if (! $fileHandler->save($filename)) {
-            return redirect()->route($this->redirects['store_error'])->with(['status' => 'notSaved', 'file' => $fileinfo]);
+            return redirect()->route($this->redirects['store_error'])->with(['alert' => ['status' => 'fileNotSaved', 'file' => $fileinfo]]);
         }
 
         // Со страницы формы может быть передан измененный вариант обработки скрипта
@@ -167,9 +165,10 @@ class FileController implements FileControllerInterface
             'disk' => $disk,
             'author_id' => 1,
             'path' => $filename,
+            // TODO $gename вытянуть группу
         ];
 
-        $file = $this->files->createWithGuardedFields(array_merge($request->input(), $fileinfo, $systemInfo, $basicFileinfo, ['options' => $additionalFileinfo]));
+        $file = $this->files->createWithGuardedFields(array_merge($fileinfo, $request->input(), $systemInfo, $basicFileinfo, ['options' => $additionalFileinfo]));
 
         if (isset($files) && is_array($files)) {
             $this->files->createModifications($file->id, $files);
@@ -200,7 +199,7 @@ class FileController implements FileControllerInterface
      */
     public function edit($id)
     {
-        $file = $this->files->find($id);
+        $file = $this->files->original()->find($id);
 
         return view($this->views['edit'] ?? 'belca-file::edit', compact('file'));
     }
@@ -211,14 +210,14 @@ class FileController implements FileControllerInterface
      * с возвратом статуса о действии.
      *
      * @param  FileRequest $request Данные формы
-     * @param  integer      $id     ID файла
+     * @param  integer     $id      ID файла
      * @return Illuminate\Http\RedirectResponse
      */
     public function update(FileRequest $request, $id)
     {
         $file = $this->files->update($request->input(), $id);
 
-        return redirect()->route($this->redirects['update'], compact('file'))->with('status', 'updated');
+        return redirect()->route($this->redirects['update'], compact('file'))->with(['alert' => ['status' => 'updated', 'file' => $file]]);
     }
 
     /**
@@ -248,13 +247,23 @@ class FileController implements FileControllerInterface
     public function destroy(FileRequest $request, $id)
     {
         // Изменение состояний связанных объектов - отдельный класс
-        // Удаление файлов - отдельный класс
+        // Удаление файлов - отдельный класс, т.к. нужно удалять связанные данные из других таблиц
         // Можно удаление пустых папок - в предыдущем
 
-        $file = $this->files->find($id)->toArray();
+        $files = $this->files->findWithModifications($id);
 
-        $this->files->delete($id); // TODO удаление связанных данных
+        if (empty($files)) {
+            return redirect()->route($this->redirects['destroy_error'])->with(['alert' => ['status' => 'noFiles', 'id' => $id]]);
+        }
 
-        return redirect()->route($this->redirects['destroy'], compact('file'))->with('status', 'deleted');
+        $originalFile = current($files);
+
+        foreach ($files as $file) {
+            Storage::disk($file->disk)->delete($file->path);
+        }
+
+        $deleted = $this->files->deleteWithModifications($id);
+
+        return redirect()->route($this->redirects['destroy'])->with(['alert' => ['status' => 'deleted', 'file' => $originalFile, 'count' => $deleted]]);
     }
 }

@@ -29,6 +29,8 @@ return [
 
     // Components | Includes
 
+    'alerts_component' => 'belca-file::components.alerts',
+
     'list_component' => 'belca-file::components.list',
 
     'inside_thumbnail_component' => 'belca-file::components.inside-thumbnail',
@@ -48,7 +50,10 @@ return [
 
     'update_redirect' => 'files.edit',
 
-    'destory_redirect' => 'files.index',
+    'destroy_redirect' => 'files.index',
+
+    // Ошибка при удалении
+    'destroy_error_redirect' => 'files.index',
 
     'modification_store_redirect' => 'files.modifications.edit',
 
@@ -89,6 +94,9 @@ return [
     'filename_pattern' => '{mime<value:group>}/{date<format:Y-m-d>}/{string<length:25>}.{extension}',
 
     // Ограничения по загрузке файлов
+    'allowed_file_types' => [],
+
+    'max_filesize' => 9999999,
 
     // Ограничения по slug (исключения)
 ];
