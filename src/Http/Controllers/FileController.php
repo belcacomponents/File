@@ -165,7 +165,11 @@ class FileController implements FileControllerInterface
             'disk' => $disk,
             'author_id' => 1,
             'path' => $filename,
-            // TODO $gename вытянуть группу
+
+            // WARNING: данное значение зависит от шаблона имени файла, и если там не будет
+            // указанного выражения, то будет возвращаться other или другое значение.
+            // TODO лучше заменить на значение из $fileHandler и добавить обработчика
+            'group' => $gename->getGeneratedValueByPropertyName('{mime<value:group>}', 'other'),
         ];
 
         $file = $this->files->createWithGuardedFields(array_merge($fileinfo, $request->input(), $systemInfo, $basicFileinfo, ['options' => $additionalFileinfo]));

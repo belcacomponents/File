@@ -16,12 +16,192 @@ return [
     */
 
     'rules' => [
+        // Simple:
         // 'handlerName' => 'rules',
 
         // Настройки пакета FGen
         'fgen' => [
-            'rules' => [],
-            'scripts' => [],
+            'drivers' => [],
+            'handlers' => [
+                'image/jpeg' => \Belca\File\FGenHandlers\SimpleImageHandler::class,
+            ],
+            'relations' => [
+                'image/jpeg' => ['image/jpeg', 'image/pjpeg'],
+            ],
+            'inspectors' => [
+                //'driver' => 'class',
+            ],
+            'scripts' => [
+                'user-device' => [
+                    //'allow' => [
+                        'jpg' => [
+                            'original',
+                            'thumbnail',
+                            'resize' => ['tiny', 'small', 'normal'],
+                            'signature',
+                        ],
+                        'png',
+                        'pdf' => [
+                            'thumbnail',
+                            'preview',
+                        ],
+                        'mp3' => [
+                            'thumbnail'
+                        ]
+                    //]
+                ],
+                'manual' => [
+                    //'disallow' => '*'
+                ],
+            ],
+            'rules' => [
+                'jpg' => [
+                    'original' => [
+                        'changed' => [
+                            '_method' => 'resize',
+                            'width' => 1400,
+                            'height' => null,
+                            'crop' => false,
+                            'compression' => 90,
+                            //'filename' => '/jpg/',
+                        ]
+                    ],
+                    'resize' => [
+                        'tiny' => [
+                            'width' => 400,
+                            'height' => null,
+                            'crop' => false,
+                            'compression' => 85,
+                        ],
+                        'small' => [
+                            'width' => 600,
+                            'height' => null,
+                            'crop' => false,
+                            'compression' => 85,
+                        ],
+                        'normal' => [
+                            'width' => 1200,
+                            'height' => null,
+                            'crop' => false,
+                            'compression' => 90,
+                        ],
+                    ],
+                    'thumbnail' => [
+                        'tiny' => [
+                            'width' => 200,
+                            'height' => 150,
+                            'crop' => true,
+                            'compression' => 75,
+                        ],
+                        'small' => [
+                            'width' => 400,
+                            'height' => 300,
+                            'crop' => true,
+                            'compression' => 80,
+                        ],
+                    ],
+                    'signature' => [
+                        'small' => [
+                            // Логика действий
+                            'signature_filename' => '/images/signature_black.png',
+                            'position' => 'bottom-right',
+                            'signature_size' => 150,
+                            'offset' => 10,
+                            'width' => 600,
+                            'height' => null,
+                            'crop' => false,
+                            'compression' => 85,
+                        ],
+                        'normal' => [
+                            'signature_filename' => '/images/signature_black.png',
+                            'position' => 'bottom-right',
+                            'signature_size' => '30%',
+                            'offset' => '2.5%',
+                            'width' => 1200,
+                            'height' => null,
+                            'crop' => false,
+                            'compression' => 90,
+                        ],
+                    ],
+                ],
+                'png' => [
+                    'thumbnail' => [
+                        'tiny' => [
+                            'width' => 200,
+                            'height' => 150,
+                            'crop' => true,
+                            'compression' => 75,
+                        ],
+                    ],
+                    'resize' => [
+                        'tiny' => [
+                            'width' => 400,
+                            'height' => null,
+                            'crop' => false,
+                            'compression' => 85,
+                        ],
+                        'small' => [
+                            'width' => 600,
+                            'height' => null,
+                            'crop' => false,
+                            'compression' => 85,
+                        ],
+                        'normal' => [
+                            'width' => 1200,
+                            'height' => null,
+                            'crop' => false,
+                            'compression' => 90,
+                        ],
+                    ],
+                    'signature' => [
+                        'small' => [
+                            // Логика действий
+                            'signature_filename' => '/images/signature_black.png',
+                            'position' => 'bottom-right',
+                            'signature_size' => 150,
+                            'offset' => 10,
+                            'width' => 600,
+                            'height' => null,
+                            'crop' => false,
+                            'compression' => 85,
+                        ],
+                        'normal' => [
+                            'signature_filename' => '/images/signature_black.png',
+                            'position' => 'bottom-right',
+                            'signature_size' => '30%',
+                            'offset' => '2.5%',
+                            'width' => 1200,
+                            'height' => null,
+                            'crop' => false,
+                            'compression' => 90,
+                        ],
+                    ],
+                ],
+                'pdf' => [
+                    'thumbnail' => [
+                        'tiny' => [
+                            'width' => 200,
+                            'height' => 150,
+                            'crop' => true,
+                            'compression' => 75,
+                        ],
+                    ],
+                    'preview' => [
+                        'small' => [
+                            'width' => 300,
+                            'height' => null,
+                            'crop' => false,
+                            'compression' => 80,
+                        ],
+                        'normal' => [
+                            'width' => 600,
+                            'height' => null,
+                            'crop' => false,
+                            'compression' => 85,
+                        ],
+                    ]
+                ],
+            ],
         ],
 
         'finfo' => [
@@ -82,6 +262,8 @@ return [
 
                 'fgen' => [
                     // Сжать файл
+                    // Сделать миниатюру
+                    // Поставить водяной знак
                 ]
             ],
             // Обработчики, которые вернут файлы для последующей обработки
@@ -108,5 +290,6 @@ return [
         // 'handlerName' => 'className',
 
         'finfo' => \Belca\File\FileHandlers\FInfoHandler::class,
+        'fgen' => \Belca\File\FileHandlers\FGenHandler::class,
     ],
 ];

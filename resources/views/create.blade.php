@@ -94,4 +94,14 @@
       {{-- End Form --}}
     @endcomponent
   @endcomponent
+
+  @push('footer')
+    <script type="text/javascript">
+      file.addEventListener('change', function () {
+          //if (title.value == '') {
+              title.value = this.files[0].name;
+          //}
+      });
+    </script>
+  @endpush
 @endsection

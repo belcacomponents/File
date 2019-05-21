@@ -17,8 +17,11 @@
        "belca/filehandler": "dev-master",
        "belca/gename": "dev-master",
        "belca/support": "dev-master",
+       "belca/finfo": "dev-master",
+       "belca/fgen": "dev-master",
        "belca/classextender": "dev-master",
-       "tucker-eric/eloquentfilter": "~1.0"
+       "tucker-eric/eloquentfilter": "~1.0",
+       "intervention/image": "~2.0"
     },
     "extra": {
         "laravel": {

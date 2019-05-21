@@ -35,7 +35,7 @@
             Открыть файл
           @endcomponent
 
-          @component(config('systemtheme.button'), ['styleModifier' => 'danger', 'attributes' => ['form' => 'deleteForm', 'type' => 'submit']])
+          @component(config('systemtheme.button'), ['styleModifier' => 'danger', 'attributes' => ['form' => 'deleteForm', 'type' => 'submit', 'id' => 'delete']])
             Удалить
           @endcomponent
 
@@ -242,4 +242,19 @@
 
     @endcomponent
   @endcomponent
+
+  {{-- Config file deletion --}}
+  @if (config('file.confirm_file_deletion'))
+    @push('footer')
+      <script type="text/javascript">
+        UIkit.util.on('#delete', 'click', function (e) {
+             e.preventDefault();
+             e.target.blur();
+             UIkit.modal.confirm('Вы действительно хотите удалить файл? Вместе с файлом будут удалены его модификации. Если файл и/или его модификации используются на сайте, то их удаление может привести к нерабочим ссылкам и ошибкам загрузки данных! Перед удалением файла убедитесь что файл и его модификации нигде не используется.').then(function () {
+                 deleteForm.submit();
+             });
+         });
+      </script>
+    @endpush
+  @endif
 @endsection
