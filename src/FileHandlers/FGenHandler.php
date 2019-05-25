@@ -65,7 +65,10 @@ class FGenHandler extends FileHandlerAdapterAbstract
      */
     public function handle($script = null)
     {
-        dd($this->instance->file($this->getFile()));
+        $this->instance->setDirectory($this->getDirectory());
+
+        //dd($this->instance->getHandler('image/jpeg', 'resize'));
+        dd($this->instance->file($this->getFilename()));
         // TODO должен генерировать значения в зависимости от типа загрузки
         // должен генерировать значения с разными размерами
         // должен генерировать миниатры
