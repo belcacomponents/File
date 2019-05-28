@@ -48,38 +48,3 @@
 1.2.3. Создание модификаций файлов
 1.2.4. Сохранение информации в БД
 1.3. Загрузка одного файла с расширением обработки и заданием правил обработки
-
-// Example 1: Сохранение и обработка файла
-$fileHandler = new FileHandler();
-
-// Задаем полный путь к файлу
-$fileHandler->setFile($filename);
-
-// Указываем рабочую директорию. В ней будут сохранены новые файлы
-$fileHandler->setDirectory($directory);
-
-// Устанавливаем параметры обработки файла
-$fileHandler->setHandlerParameters($params);
-
-// Запускаем обработку файла
-$fileHandler->handle($params); // неоднозначно
-
-// Получаем всю информацию о сгенерированных файлах
-$files = $fileHandler->getSavedFiles(true);
-
-// Example 2: Сохранение файла без обработки
-$fileHandler = new FileHandler();
-
-// Задаем полный путь к файлу
-$fileHandler->setFile($filename);
-
-// Указываем рабочую директорию. В ней будет сохранен файл
-$fileHandler->setDirectory($directory);
-
-// Задаем новое имя файла относительно указанного каталога
-$fileHandler->setFilename($filename);
-
-$fileHandler->save();
-
-// Получаем всю информацию о сохраненном файле
-$file = $fileHandler->getSavedFile(true);
