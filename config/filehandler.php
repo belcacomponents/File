@@ -23,8 +23,8 @@ return [
         'fgen' => [
             'drivers' => [],
             'handlers' => [
-                'image/jpeg' => \Belca\File\FGenHandlers\SimpleImageHandler::class,
-                'image/png' => \Belca\File\FGenHandlers\SimpleImageHandler::class,
+                'image/jpeg' => \Dios\SimpleImageHandler\SimpleImageHandlerFGenModule::class,
+                'image/png' => \Dios\SimpleImageHandler\SimpleImageHandlerFGenModule::class,
             ],
             'relations' => [
                 'image/jpeg' => ['image/jpeg', 'image/pjpeg'],
@@ -36,7 +36,6 @@ return [
                 'user-device' => [
                     //'allow' => [
                         'image/jpeg' => [
-                            'original',
                             'thumbnail',
                             'resize' => ['tiny', 'small', 'normal'],
                             'signature',
@@ -57,15 +56,6 @@ return [
             ],
             'rules' => [
                 'image/jpeg' => [
-                    'original' => [
-                        'changed' => [
-                            '_method' => 'resize',
-                            'width' => 1920,
-                            'compression' => 95,
-                            'reduce' => true,
-                            'directory_pattern' => 'image/originalChanged/{date<format:Y-m-d>}',
-                        ]
-                    ],
                     'resize' => [
                         'tiny' => [
                             'width' => 480,
@@ -226,6 +216,21 @@ return [
             ],
         ],
 
+        'fgen_original' => [
+            'rules' => [
+                'image/jpeg' => [
+                    'original' => [
+                        'changed' => [
+                            '_method' => 'resize',
+                            'width' => 1920,
+                            'compression' => 95,
+                            'reduce' => true,
+                        ]
+                    ],
+                ],
+            ],
+        ],
+
         'finfo' => [
             'handlers' => [
                 'basic' => \Belca\FInfo\BasicFileinfo::class,
@@ -273,7 +278,27 @@ return [
             'sequence' => ['fgen', 'finfo'],
 
             // Основные свойства файла
-            'properties' => ['finfo.mime', 'finfo.size', 'finfo.created' => 'created_at'],
+            'properties' => [
+                // FInfo
+                'finfo.mime', 'finfo.size', 'finfo.created' => 'created_at',
+
+                // FGen
+                'fgen.size', 'fgen.mime', 'fgen.handler', 'fgen.handler_mode',
+                'fgen.driver', 'fgen.extension',
+
+                // FGenOriginal
+                'fgen.size', 'fgen.mime', 'fgen.handler', 'fgen.handler_mode',
+                'fgen.driver', 'fgen.extension',
+            ],
+
+            // Исключить свойства из сохраняемых свойств
+            'exclude_properties' => [
+                'fgen.fullname', 'fgen.final_directory', 'fgen.source_directory',
+                'fgen.original_file',
+
+                'fgen_original.fullname', 'fgen_original.final_directory',
+                'fgen_original.source_directory', 'fgen_original.original_file',
+            ],
 
             // Выполняемые обработчики и их настройки
             'handlers' => [
@@ -283,10 +308,13 @@ return [
                 ],
 
                 'fgen' => [
-                    // Сжать файл
                     // Сделать миниатюру
                     // Поставить водяной знак
-                ]
+                ],
+
+                'fgen_original' => [
+                    // Сжать файл
+                ],
             ],
             // Обработчики, которые вернут файлы для последующей обработки
             // Или обработчики, принимающие значения указанных обработчиков
@@ -313,5 +341,7 @@ return [
 
         'finfo' => \Belca\File\FileHandlers\FInfoHandler::class,
         'fgen' => \Belca\File\FileHandlers\FGenHandler::class,
+        // Заменяет оригинальный файл
+        //'fgen_original' => \Belca\File\FileHandlers\FGenOriginalHandler::class,
     ],
 ];

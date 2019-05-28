@@ -47,13 +47,13 @@ class FGenHandler extends FileHandlerAdapterAbstract
     }
 
     /**
-     * Возвращает тип обработчика: порождающий, извлекающий или модифицирующий.
+     * Возвращает тип обработчика: порождающий.
      *
      * @var string
      */
     public static function getHandlerType()
     {
-        return self::EXTRACTING;
+        return self::GENERATING;
     }
 
     /**
@@ -66,13 +66,34 @@ class FGenHandler extends FileHandlerAdapterAbstract
     public function handle($script = null)
     {
         $this->instance->setDirectory($this->getDirectory());
-
-        //dd($this->instance->getHandler('image/jpeg', 'resize'));
-        dd($this->instance->file($this->getFilename()));
         // TODO должен генерировать значения в зависимости от типа загрузки
-        // должен генерировать значения с разными размерами
-        // должен генерировать миниатры
-        // должен генерировать файлы с водяными знаками
-        //$this->info = Fileinfo::file($this->getFile());
+        // и измененных правил обработки/скриптов
+        $rawData = $this->instance->file($this->getFilename());
+
+        // Полученный массив приводится к виду для обработки в контроллере
+        // FileController и последующего сохранения в БД.
+        // Результатом обработки будут модификации файла.
+        // По правилам возврата такого метода обработки должен стать массив,
+        // где ключи - имена файлов, а значения - данные полученные во время
+        // обработки.
+        if (is_array($rawData) && is_string(key($rawData))) {
+            $driver = key($rawData);
+            $rawData = current($rawData);
+            $result = [];
+
+            if ($rawData) {
+                foreach ($rawData as $handler => $handlingModes) {
+                    foreach ($handlingModes as $mode => $handlingData) {
+                        $result[$handlingData['relative_filename']] = array_merge([
+                            'driver' => $driver,
+                            'handler' => $handler,
+                            'handler_mode' => $mode,
+                        ], $handlingData ?: []);
+                    }
+                }
+            }
+        }
+
+        $this->info = $result ?? [];
     }
 }

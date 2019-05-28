@@ -20,8 +20,8 @@
        "belca/finfo": "dev-master",
        "belca/fgen": "dev-master",
        "belca/classextender": "dev-master",
-       "tucker-eric/eloquentfilter": "~1.0",
-       "intervention/image": "~2.0"
+       "dios/simple-image-handler": "dev-master",
+       "tucker-eric/eloquentfilter": "~1.0"
     },
     "extra": {
         "laravel": {

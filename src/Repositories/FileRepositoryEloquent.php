@@ -53,13 +53,13 @@ class FileRepositoryEloquent extends BaseRepository implements FileRepositoryInt
     }
 
     /**
-     * Сохраняет переданные значения.
+     * Сохраняет переданные значения минуя указанные защищенные поля.
      *
-     * @param  mixed  $attributes   Все данные полей ввода
+     * @param  mixed  $values       Все данные полей ввода
      * @param  array  $guarded      Защищенные поля разрешенные для заполнения
      * @return mixed
      */
-    public function createWithGuardedFields($attributes, $guarded = [])
+    public function createWithoutGuardedFields($values, $guarded = [])
     {
         if (empty($guarded)) {
             if (! empty($this->guarded) && is_array($this->guarded)) {
@@ -70,41 +70,65 @@ class FileRepositoryEloquent extends BaseRepository implements FileRepositoryInt
             }
         }
 
-        $model = $this->model->newInstance($attributes);
-        $model->forceFill(array_only($attributes, $guarded));
-        $model->fill($attributes);
+        $model = $this->model->newInstance($values);
+        $model->forceFill(array_only($values, $guarded));
+        $model->fill($values);
         $model->save();
         $this->resetModel();
 
         return $this->parserResult($model);
     }
 
-    public function createWithGuardedValues($attributes, $guardedValues = [])
+    /**
+     * Сохраняет значения с защищенными значениями. Разрешенные значения
+     * сохраняются при указании их в защищенных полях.
+     *
+     * @param  array  $values        Любые разрешенные знаения
+     * @param  array  $allowedValues Разрешенные значения
+     * @param  array  $guarded      Защищенные поля
+     * @return [type]                [description]
+     */
+    public function createWithGuardedValues($values, $allowedValues, $guarded = [])
     {
         // TODO защищенные поля и значения
     }
 
     /**
-     * Создает модификации в таблице на основе ID родителя и данных о модификациях.
+     * Создает модификации в таблице на основе ID родителя и данных
+     * о модификациях. Возвращает количество созданных модификаций или false,
+     * если не найден указанных родитель.
      *
-     * @param  integer $id ID родительской записи (файла)
-     * @param  mixed $files      Массив данных о модификациях
-     * @return [type]           [description]
+     * @param  integer            $id
+     * @param  mixed              $files
+     * @return boolean|integer
      */
-    public function createModifications($id, $files = [])
+    public function createModifications($id, $files = [], $guarded = [])
     {
+        $parent = $this->model->find($id);
+
+        if (empty($parent)) {
+            return false;
+        }
+
+        $count = 0;
+
         if (is_array($files) && count($files)) {
             foreach ($files as $file) {
-                // TODO задать parent_id
-                $this->model->create($file);
+                // TODO скопировать "публичные" значения родительской записи,
+                // если они будут в информации, то будут переопределены
+                $this->createWithoutGuardedFields(array_merge(['parent_id' => $parent->id], $file));
+                $count++;
             }
         }
+
+        return $count;
     }
 
     /**
-     * Удаляет экземпляр файла вместе с модификациями.
+     * Удаляет экземпляр файла вместе с модификациями. Возвращает количество
+     * удаленных записей.
      *
-     * @param  ineger  $id
+     * @param  integer  $id
      * @return integer
      */
     public function deleteWithModifications($id)
@@ -119,14 +143,13 @@ class FileRepositoryEloquent extends BaseRepository implements FileRepositoryInt
     }
 
     /**
-     * Возвращает список модификаций указанного экземпляра файла.
+     * Возвращает модификации указанного экземпляра файла.
      *
-     * @param  integer $id
+     * @param  integer      $id
      * @return Collection
      */
     public function getModifications($id)
     {
-        // TODO можем вторым параметром задать класс обертки - оборачивающий данные в объект
         return $this->model->whereParentId($id)->get();
     }
 
@@ -136,7 +159,7 @@ class FileRepositoryEloquent extends BaseRepository implements FileRepositoryInt
      * @param  integer $id
      * @return array
      */
-    public function findWithModifications($id)
+    public function findWithModifications($id/*, $wrapper*/)
     {
         $files = [];
         $file = $this->model->original()->find($id);

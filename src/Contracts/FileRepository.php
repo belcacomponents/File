@@ -15,7 +15,7 @@ interface FileRepository extends RepositoryInterface
      * @param  array  $guarded    Список защищенных полей, которые будут заполнены
      * @return mixed
      */
-    public function createWithGuardedFields($attributes, $guarded = []);
+    public function createWithoutGuardedFields($values, $guarded = []);
 
     /**
      * Создает объект с заданием значений защищенных полей указанных в
@@ -25,7 +25,7 @@ interface FileRepository extends RepositoryInterface
      * @param  array  $guardedValues Значения защищенных полей
      * @return mixed
      */
-    public function createWithGuardedValues($attributes, $guardedValues = []);
+    public function createWithGuardedValues($values, $allowedValues, $guarded = []);
 
     public function createModifications($id, $modifications);
 

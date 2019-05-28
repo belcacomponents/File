@@ -153,7 +153,8 @@ class FileController implements FileControllerInterface
         // в методе handle.
         $fileHandler->handle($request->input('handler_parameters'));
 
-        // Получаем информацию об оригинальном файле и сохраняем ее в БД.
+        // Получаем информацию об оригинальном файле и модификациях,
+        // затем сохраняем ее в БД.
         $basicFileinfo = $fileHandler->getBasicFileProperties();
         $additionalFileinfo = $fileHandler->getAdditionalFileProperties();
         $files = $fileHandler->getFilePaths();
@@ -165,16 +166,32 @@ class FileController implements FileControllerInterface
             'disk' => $disk,
             'author_id' => 1,
             'path' => $filename,
-
-            // WARNING: данное значение зависит от шаблона имени файла, и если там не будет
-            // указанного выражения, то будет возвращаться other или другое значение.
-            // TODO лучше заменить на значение из $fileHandler и добавить обработчика
-            'group' => $gename->getGeneratedValueByPropertyName('{mime<value:group>}', 'other'),
         ];
 
-        $file = $this->files->createWithGuardedFields(array_merge($fileinfo, $request->input(), $systemInfo, $basicFileinfo, ['options' => $additionalFileinfo]));
+        $file = $this->files->createWithoutGuardedFields(array_merge($fileinfo, $request->input(), $systemInfo, $basicFileinfo, ['options' => $additionalFileinfo]));
 
-        if (isset($files) && is_array($files)) {
+        if (! empty($files) && is_array($files)) {
+
+            // Перед передачей для сохранения необходимо подготовить информацию
+            // с определенными данными.
+            foreach ($files as $fn => $properties) {
+
+                // Добавляем в имя файла ключ родителя, хотя можем использовать
+                // все что угодно
+                // TODO вынести в отдельный метод и передать туда массив данных?
+                $title = $file->title.' ['.$file->id.']';
+
+                $files[$fn] = [
+                    'disk' => $disk,
+                    'author_id' => 1,
+                    'path' => $fn,
+                    'title' => $title,
+                ];
+
+                $files[$fn] = array_merge($files[$fn], $basicPropertiesModifications[$fn]);
+                $files[$fn]['options'] = $additinalPropertiesModifications[$fn];
+            }
+
             $this->files->createModifications($file->id, $files);
         }
 

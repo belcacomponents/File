@@ -103,7 +103,7 @@
                 @endcomponent
 
                 {{-- Input - Slug --}}
-                @component(config('systemtheme.textinput'), ['attributes' => ['name' => 'slug', 'value' => $file->slug, 'placeholder' => 'ЧПУ файла', 'value' => $file->slug ?? '']])
+                @component(config('systemtheme.linkinput'), ['receivers' => ['#link'], 'attributes' => ['name' => 'slug', 'placeholder' => 'ЧПУ файла', 'value' => $file->slug ?? '']])
                   @slot('label')
                     ЧПУ
                   @endslot
@@ -141,7 +141,7 @@
                 @endcomponent
 
                 {{-- Input - Direct file link --}}
-                @component(config('systemtheme.linkoutput'), ['open' => true, 'copy' => true, 'attributes' => ['value' => \Storage::url($file->path), 'placeholder' => 'Прямая ссылка для загрузки файла', 'readonly' => true]])
+                @component(config('systemtheme.linkoutput'), ['open' => true, 'copy' => true, 'attributes' => ['value' => \Storage::url($file->path), 'placeholder' => 'Прямая ссылка для загрузки файла', 'readonly' => true, 'id' => 'filepath']])
                   @slot('label')
                     Прямая ссылка на оригинальный файл
                   @endslot
