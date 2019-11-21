@@ -47,7 +47,8 @@ return [
     'download_middleware' => ['web'],
 
     // Посредники управления файлами: веб, авторизованные, роли и определенные пользователи
-    'file_management_middleware' => ['web'/*, 'auth' , 'roles:root,admin', 'users:dios'*/],
+    'middlewares' => ['web', 'auth' /*, 'roles:root,admin', 'users:dios'*/],
+
 
     // Правило генерации имени для загружаемого файла
     'filename_pattern' => '{mime<value:group>}/{date<format:Y-m-d>}/{string<length:25>}.{extension}',
