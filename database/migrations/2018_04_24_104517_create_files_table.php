@@ -54,7 +54,8 @@ class CreateFilesTable extends Migration
           /**
            * Кодовое имя носителя.
            *
-           * Соответствует значению конфигурационного файла Filesystems (config/filesystems.php)
+           * Соответствует значению конфигурационного файла
+           * config/filesystems.php в Laravel
            */
           $table->string('disk', 32)->default('public');
 

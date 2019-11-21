@@ -37,8 +37,8 @@ return [
                     //'allow' => [
                         'image/jpeg' => [
                             'thumbnail',
-                            'resize' => ['tiny', 'small', 'normal'],
-                            'signature',
+                            'resize' => ['xxsmall', 'xsmall', 'small', 'medium', 'large'],
+                            //'signature',
                         ],
                         'png',
                         'pdf' => [
@@ -57,27 +57,43 @@ return [
             'rules' => [
                 'image/jpeg' => [
                     'resize' => [
-                        'tiny' => [
+                        // 'xxsmall' => [
+                        //     'width' => 128,
+                        //     'compression' => 80,
+                        //     'reduce' => true,
+                        //     'directory_prefix_pattern' => '{sourceDirectory}',
+                        //     'directory_pattern' => 'image/resize/{date<format:Y-m-d>}',
+                        //     'filename_pattern' => 'resize/{string<length:25>}_resize_xxsmall.{extension<default:jpg>}',
+                        // ],
+                        // 'xsmall' => [
+                        //     'width' => 256,
+                        //     'compression' => 90,
+                        //     'reduce' => true,
+                        //     'directory_prefix_pattern' => '{sourceDirectory}',
+                        //     'directory_pattern' => 'image/resize/{date<format:Y-m-d>}',
+                        //     'filename_pattern' => 'resize/{string<length:25>}_resize_xsmall.{extension<default:jpg>}',
+                        // ],
+                        'small' => [
                             'width' => 480,
                             'compression' => 90,
                             'reduce' => true,
                             'directory_prefix_pattern' => '{sourceDirectory}',
                             'directory_pattern' => 'image/resize/{date<format:Y-m-d>}',
-                            'filename_pattern' => 'resize/{string<length:25>}_resize_tiny.{extension<default:jpg>}',
+                            'filename_pattern' => 'resize/{string<length:25>}_resize_small.{extension<default:jpg>}',
                         ],
-                        'small' => [
-                            'width' => 640,
+                        'medium' => [
+                            'width' => 720,
                             'compression' => 90,
                             'reduce' => true,
                             'directory_pattern' => 'image/resize/{date<format:Y-m-d>}',
-                            'filename_pattern' => 'resize/{string<length:25>}_resize_small.{extension<default:jpg>}',
+                            'filename_pattern' => 'resize/{string<length:25>}_resize_medium.{extension<default:jpg>}',
                         ],
-                        'normal' => [
+                        'large' => [
                             'width' => 1280,
                             'compression' => 90,
                             'reduce' => true,
                             'directory_pattern' => 'image/resize/{date<format:Y-m-d>}',
-                            'filename_pattern' => 'resize/{string<length:25>}_resize_normal.{extension<default:jpg>}',
+                            'filename_pattern' => 'resize/{string<length:25>}_resize_large.{extension<default:jpg>}',
                         ],
                     ],
                     'thumbnail' => [
@@ -88,26 +104,26 @@ return [
                             'directory_pattern' => 'image/thumbnail/{date<format:Y-m-d>}',
                             'filename_pattern' => 'thumbnail/{string<length:25>}_thumbnail_small.{extension<default:jpg>}',
                         ],
-                        'tiny' => [
+                        'xsmall' => [
                             'width' => 100,
                             'height' => 100,
                             'compression' => 75,
                             'directory_pattern' => 'image/thumbnail/{date<format:Y-m-d>}',
-                            'filename_pattern' => 'thumbnail/{string<length:25>}_thumbnail_tiny.{extension<default:jpg>}',
+                            'filename_pattern' => 'thumbnail/{string<length:25>}_thumbnail_xsmall.{extension<default:jpg>}',
                         ],
                     ],
                     'signature' => [
-                        'small' => [
-                            'mark_filename' => public_path('/images/signature_black.png'),
-                            'mark_position' => 'bottom-right',
-                            'mark_size' => 175,
-                            'mark_offset' => 10,
-                            'width' => 600,
-                            'compression' => 85,
-                            'directory_pattern' => 'image/signature/{date<format:Y-m-d>}',
-                            'filename_pattern' => 'signature/{string<length:25>}_signature_small.{extension<default:jpg>}',
-                        ],
-                        'normal' => [
+                        // 'small' => [
+                        //     'mark_filename' => public_path('/images/signature_black.png'),
+                        //     'mark_position' => 'bottom-right',
+                        //     'mark_size' => 175,
+                        //     'mark_offset' => 10,
+                        //     'width' => 600,
+                        //     'compression' => 85,
+                        //     'directory_pattern' => 'image/signature/{date<format:Y-m-d>}',
+                        //     'filename_pattern' => 'signature/{string<length:25>}_signature_small.{extension<default:jpg>}',
+                        // ],
+                        'medium' => [
                             'mark_filename' => public_path('/images/signature_black.png'),
                             'mark_position' => 'bottom-right',
                             'mark_size' => '35%',
@@ -115,7 +131,7 @@ return [
                             'width' => 1200,
                             'compression' => 90,
                             'directory_pattern' => 'image/signature/{date<format:Y-m-d>}',
-                            'filename_pattern' => 'signature/{string<length:25>}_signature_normal.{extension<default:jpg>}',
+                            'filename_pattern' => 'signature/{string<length:25>}_signature_medium.{extension<default:jpg>}',
                         ],
                     ],
                 ],
@@ -128,23 +144,23 @@ return [
                             'directory_pattern' => 'image/thumbnail/{date<format:Y-m-d>}',
                             'filename_pattern' => '{string<length:25>}_thumbnail_small.{extension<default:png>}',
                         ],
-                        'tiny' => [
-                            'width' => 100,
-                            'height' => 100,
-                            'compression' => 80,
-                            'directory_pattern' => 'image/thumbnail/{date<format:Y-m-d>}',
-                            'filename_pattern' => '{string<length:25>}_thumbnail_tiny.{extension<default:png>}',
-                        ],
+                        // 'xsmall' => [
+                        //     'width' => 100,
+                        //     'height' => 100,
+                        //     'compression' => 80,
+                        //     'directory_pattern' => 'image/thumbnail/{date<format:Y-m-d>}',
+                        //     'filename_pattern' => '{string<length:25>}_thumbnail_xsmall.{extension<default:png>}',
+                        // ],
                     ],
                     'resize' => [
-                        'tiny' => [
-                            'width' => 400,
-                            'height' => null,
-                            'crop' => false,
-                            'compression' => 85,
-                            'directory_pattern' => '/image/resize/{date<format:Y-m-d>}',
-                            'filename_pattern' => '{string<length:25>}_resize_tiny.{extension<default:png>}',
-                        ],
+                        // 'xsmall' => [
+                        //     'width' => 400,
+                        //     'height' => null,
+                        //     'crop' => false,
+                        //     'compression' => 85,
+                        //     'directory_pattern' => '/image/resize/{date<format:Y-m-d>}',
+                        //     'filename_pattern' => '{string<length:25>}_resize_xsmall.{extension<default:png>}',
+                        // ],
                         'small' => [
                             'width' => 600,
                             'height' => null,
@@ -153,29 +169,29 @@ return [
                             'directory_pattern' => '/image/resize/{date<format:Y-m-d>}',
                             'filename_pattern' => '{string<length:25>}_resize_small.{extension<default:png>}',
                         ],
-                        'normal' => [
+                        'medium' => [
                             'width' => 1200,
                             'height' => null,
                             'crop' => false,
                             'compression' => 90,
                             'directory_pattern' => '/image/resize/{date<format:Y-m-d>}',
-                            'filename_pattern' => '{string<length:25>}_resize_normal.{extension<default:png>}',
+                            'filename_pattern' => '{string<length:25>}_resize_medium.{extension<default:png>}',
                         ],
                     ],
                     'signature' => [
-                        'small' => [
-                            // Логика действий
-                            'signature_filename' => '/images/signature_black.png',
-                            'position' => 'bottom-right',
-                            'signature_size' => 150,
-                            'offset' => 10,
-                            'width' => 600,
-                            'height' => null,
-                            'crop' => false,
-                            'compression' => 85,
-                            'directory_pattern' => '/image/signature/{date<format:Y-m-d>}',
-                            'filename_pattern' => '{string<length:25>}_signature_small.{extension<default:png>}',
-                        ],
+                        // 'small' => [
+                        //     // Логика действий
+                        //     'signature_filename' => '/images/signature_black.png',
+                        //     'position' => 'bottom-right',
+                        //     'signature_size' => 150,
+                        //     'offset' => 10,
+                        //     'width' => 600,
+                        //     'height' => null,
+                        //     'crop' => false,
+                        //     'compression' => 85,
+                        //     'directory_pattern' => '/image/signature/{date<format:Y-m-d>}',
+                        //     'filename_pattern' => '{string<length:25>}_signature_small.{extension<default:png>}',
+                        // ],
                         'normal' => [
                             'signature_filename' => '/images/signature_black.png',
                             'position' => 'bottom-right',
@@ -219,14 +235,14 @@ return [
         'fgen_original' => [
             'rules' => [
                 'image/jpeg' => [
-                    'original' => [
-                        'changed' => [
-                            '_method' => 'resize',
-                            'width' => 1920,
-                            'compression' => 95,
-                            'reduce' => true,
-                        ]
-                    ],
+                    // 'original' => [
+                    //     'changed' => [
+                    //         '_method' => 'resize',
+                    //         'width' => 1920,
+                    //         'compression' => 95,
+                    //         'reduce' => true,
+                    //     ]
+                    // ],
                 ],
             ],
         ],

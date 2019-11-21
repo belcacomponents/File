@@ -1,33 +1,52 @@
-{{-- /resources/views/create.blade.php --}}
-{{-- Страница загрузки файла --}}
-@extends(config('systemtheme.app'))
+@extends(component_path('app'))
 
 @section('title', 'Загрузка файл')
 
 @section('content')
-  @component(config('systemtheme.workspace'))
+  @component(component_path('workspace'))
     {{-- Breadcrumbs --}}
-    @include(config('systemtheme.breadcrumbs'), ['breadcrumbs' => [['link' => '/system', 'label' => 'Главная'], ['link' => route('files.index'), 'label' => __('belca-file::files.files')], ['label' => __('belca-file::files.upload_file_title')]]])
+    @include(component_path('breadcrumbs'), [
+      'breadcrumbs' => [
+        ['link' => '/system', 'label' => 'Главная'],
+        ['link' => route('file_tools.files.index'), 'label' => __('belca-file::files.files')],
+        ['label' => __('belca-file::files.upload_file_title')]
+      ]
+    ])
 
     {{-- Container --}}
-    @component(config('systemtheme.container'))
-      @component(config('systemtheme.heading'))
+    @component(component_path('container'))
+      @component(component_path('heading'))
         @lang('belca-file::files.upload_file_title')
       @endcomponent
 
       {{-- Form --}}
-      @component(config('systemtheme.form'), ['attributes' => ['action' => route('files.store'), 'method' => 'post', 'enctype' =>'multipart/form-data']])
+      @component(component_path('form'), [
+        'attributes' => [
+          'action' => route('file_tools.files.store'),
+          'method' => 'post',
+          'enctype' =>'multipart/form-data'
+        ]
+      ])
 
         {{-- Control panel --}}
-        @component(config('systemtheme.control-panel'))
+        @component(component_path('control_panel'))
           {{-- Section: Buttons --}}
           @section('buttons')
-            @component(config('systemtheme.button'), ['styleModifier' => 'primary', 'attributes' => ['type' => 'submit']])
+            @component(component_path('button'), [
+              'type' => 'primary',
+              'attributes' => [
+                'type' => 'submit'
+              ]
+            ])
               @lang('belca-file::files.save_file')
             @endcomponent
           @show
 
-          @component(config('systemtheme.buttonlink'), ['attributes' => ['href' => $back ?? route('files.index')]])
+          @component(component_path('link_button'), [
+            'attributes' => [
+              'href' => route('file_tools.files.index')
+            ]
+          ])
             Назад
           @endcomponent
         @endcomponent
@@ -38,7 +57,7 @@
 
         {{-- Errors --}}
         @if ($errors->any())
-          @component(config('systemtheme.alert'), ['type' => 'danger'])
+          @component(component_path('alert'), ['type' => 'danger'])
             @slot('title')
               Ошибка
             @endslot
@@ -50,19 +69,23 @@
         @endif
 
         {{-- Groups --}}
-        @component(config('systemtheme.groups'))
+        @component(component_path('groups'))
 
           {{-- Section: Groups --}}
           @section('groups')
             {{-- Group - Main --}}
-            @component(config('systemtheme.group'))
-              @component(config('systemtheme.heading'), ['type' => 'h2'])
+            @component(component_path('group'))
+              @component(component_path('heading'), ['type' => 'h2'])
                 @lang('belca-file::files.file_information')
               @endcomponent
 
               {{-- Section: File selection --}}
               @section('fileSelection')
-                @component(config('systemtheme.filecustom'), ['attributes' => ['name' => 'file']])
+                @component(component_path('filecustom'), [
+                  'attributes' => [
+                    'name' => 'file'
+                  ]
+                ])
                   @lang('belca-file::files.select_file')
                 @endcomponent
               @show
@@ -70,14 +93,20 @@
               {{-- Section: Input fields --}}
               @section('inputFields')
                 {{-- Input - Title --}}
-                @component(config('systemtheme.textinput'), ['attributes' => ['name' => 'title', 'value' => old('title'), 'placeholder' => __('belca-file::files.filename')]])
+                @component(component_path('input_field'), [
+                  'attributes' => [
+                    'name' => 'title',
+                    'value' => old('title'),
+                    'placeholder' => __('belca-file::files.filename')
+                  ]
+                ])
                   @slot('label')
                     @lang('belca-file::files.filename')
                   @endslot
                 @endcomponent
 
                 {{-- Textarea - Description --}}
-                @component(config('systemtheme.multilineinput'), ['attributes' => ['name' => 'description', 'value' => old('description'), 'placeholder' => __('belca-file::files.file_description')]])
+                @component(component_path('textarea_field'), ['attributes' => ['name' => 'description', 'value' => old('description'), 'placeholder' => __('belca-file::files.file_description')]])
                   @slot('label')
                     @lang('belca-file::files.file_description')
                   @endslot

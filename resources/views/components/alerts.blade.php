@@ -14,7 +14,7 @@
         break;
     }
   @endphp
-  @component(config('systemtheme.alert'), ['type' => $type ?? null])
+  @component(component_path('alert'), ['type' => $type ?? null])
 
     @switch (session('alert.status'))
       @case('deleted')

@@ -1,45 +1,49 @@
-{{-- /resources/views/edit.blade.php --}}
-{{-- Страница правки информации о файле --}}
 {{-- TODO Должен иметь возможность расширения c помощью секций, компонентов и стеков --}}
-@extends(config('systemtheme.app'))
+@extends(component_path('app'))
 
 @section('title', 'Правка файла: '.$file->title.' ['.$file->id.']')
 
 @section('content')
-  @component(config('systemtheme.workspace'))
+  @component(component_path('workspace'))
     {{-- Breadcrumbs --}}
-    @include(config('systemtheme.breadcrumbs'), ['breadcrumbs' => [['link' => '/system', 'label' => 'Главная'], ['link' => route('files.index'), 'label' => 'Файлы'], ['label' => 'Правка файла']]])
+    @include(component_path('breadcrumbs'), [
+      'breadcrumbs' => [
+        ['link' => '/system', 'label' => 'Главная'],
+        ['link' => route('file_tools.files.index'), 'label' => 'Файлы'],
+        ['label' => 'Правка файла']
+      ]
+    ])
 
     {{-- Container --}}
-    @component(config('systemtheme.container'))
+    @component(component_path('container'))
 
       {{-- Heading --}}
-      @component(config('systemtheme.heading'))
+      @component(component_path('heading'))
         Правка файла: {{ $file->title }}
       @endcomponent
 
       {{-- Delete form  --}}
-      @component(config('systemtheme.form'), ['crud' => 'delete','attributes' => ['action' => route('files.destroy', $file->id), 'id' => 'deleteForm']])
+      @component(component_path('form'), ['crud' => 'delete','attributes' => ['action' => route('file_tools.files.destroy', $file->id), 'id' => 'deleteForm']])
       @endcomponent
 
       {{-- Form --}}
-      @component(config('systemtheme.form'), ['crud' => 'put','attributes' => ['action' => route('files.update', $file->id)]])
+      @component(component_path('form'), ['crud' => 'put','attributes' => ['action' => route('file_tools.files.update', $file->id)]])
 
         {{-- Control panel --}}
-        @component(config('systemtheme.control-panel'))
-          @component(config('systemtheme.button'), ['styleModifier' => 'primary', 'attributes' => ['type' => 'submit']])
+        @component(component_path('control_panel'))
+          @component(component_path('button'), ['type' => 'primary', 'attributes' => ['type' => 'submit']])
             Сохранить
           @endcomponent
 
-          @component(config('systemtheme.buttonlink'), ['attributes' => ['href' => route('files.show', $file->id), 'target' => '_blank']])
+          @component(component_path('link_button'), ['attributes' => ['href' => route('file_tools.files.show', $file->id), 'target' => '_blank']])
             Открыть файл
           @endcomponent
 
-          @component(config('systemtheme.button'), ['styleModifier' => 'danger', 'attributes' => ['form' => 'deleteForm', 'type' => 'submit', 'id' => 'delete']])
+          @component(component_path('button'), ['type' => 'danger', 'attributes' => ['form' => 'deleteForm', 'type' => 'submit', 'id' => 'delete']])
             Удалить
           @endcomponent
 
-          @component(config('systemtheme.buttonlink'), ['attributes' => ['href' => $back ?? route('files.index')]])
+          @component(component_path('link_button'), ['attributes' => ['href' => route('file_tools.files.index')]])
             Назад
           @endcomponent
 
@@ -50,19 +54,19 @@
         @include(config('file.alerts_component'))
 
         {{-- Zones --}}
-        @component(config('systemtheme.zones'))
-          @component(config('systemtheme.zone'), ['type' => 'basic'])
+        @component(component_path('zones'))
+          @component(component_path('zone'), ['type' => 'basic'])
             {{-- Groups --}}
-            @component(config('systemtheme.groups'))
+            @component(component_path('groups'))
 
               {{-- Group - Main --}}
-              @component(config('systemtheme.group'))
-                @component(config('systemtheme.heading'), ['type' => 'h2'])
+              @component(component_path('group'))
+                @component(component_path('heading'), ['type' => 'h2'])
                   @lang('belca-file::files.file_information')
                 @endcomponent
 
                 {{-- Input - Title --}}
-                @component(config('systemtheme.textinput'), ['attributes' => ['name' => 'title', 'value' => $file->title, 'placeholder' => __('belca-file::files.filename')]])
+                @component(component_path('input_field'), ['attributes' => ['name' => 'title', 'value' => $file->title, 'placeholder' => __('belca-file::files.filename')]])
                   @slot('label')
                     @lang('belca-file::files.filename')
                   @endslot
@@ -71,7 +75,7 @@
                 {{-- TODO дополняется, например, категория, диск --}}
 
                 {{-- Textarea - Description --}}
-                @component(config('systemtheme.multilineinput'), ['attributes' => ['name' => 'description', 'placeholder' => __('belca-file::files.file_description')]])
+                @component(component_path('textarea_field'), ['attributes' => ['name' => 'description', 'placeholder' => __('belca-file::files.file_description')]])
                   @slot('label')
                     @lang('belca-file::files.file_description')
                   @endslot
@@ -81,12 +85,12 @@
               @endcomponent
 
               {{-- Group - Published --}}
-              @component(config('systemtheme.group'))
-                @component(config('systemtheme.heading'), ['type' => 'h2'])
+              @component(component_path('group'))
+                @component(component_path('heading'), ['type' => 'h2'])
                   Публикация файла
                 @endcomponent
 
-                @component(config('systemtheme.description'))
+                @component(component_path('description'))
                   <p>
                     Загружаемые файлы можно скачать без публикации. Но каждому
                     загружаемому файлу присваивается уникальное труднозапоминаемое имя.
@@ -98,18 +102,18 @@
                   </p>
                 @endcomponent
 
-                @component(config('systemtheme.checkboxfield'), ['attributes' => ['name' => 'published', 'checked' => $file->published ?? false]])
+                @component(component_path('checkbox_field'), ['attributes' => ['name' => 'published', 'checked' => $file->published ?? false]])
                   Файл разрешен для скачивания по прямой ссылке
                 @endcomponent
 
                 {{-- Input - Slug --}}
-                @component(config('systemtheme.linkinput'), ['receivers' => ['#link'], 'attributes' => ['name' => 'slug', 'placeholder' => 'ЧПУ файла', 'value' => $file->slug ?? '']])
+                @component(component_path('linkinput'), ['receivers' => ['#linkLink', '#link'], 'prefix_link' => route('file_tools.download', ''), 'attributes' => ['name' => 'slug', 'placeholder' => 'ЧПУ файла', 'value' => $file->slug ?? '']])
                   @slot('label')
                     ЧПУ
                   @endslot
                 @endcomponent
 
-                @component(config('systemtheme.linkoutput'), ['open' => true, 'copy' => true, 'prefix' => config('file.url_prefix_download'), 'attributes' => ['id' => 'link', 'placeholder' => 'Ссылка для скачивания файла', 'value' => ! empty($file->slug) ? route('files.download', $file->slug) : '']])
+                @component(component_path('linkoutput'), ['open' => true, 'copy' => true, 'prefix_link' => route('file_tools.download', ''), 'attributes' => ['id' => 'link', 'placeholder' => 'Ссылка для скачивания файла', 'value' => $file->slug ?? '']])
                   @slot('label')
                     Ссылка на файл
                   @endslot
@@ -123,12 +127,12 @@
 
               {{-- TODO расширяется секция --}}
               {{-- Group - Storage --}}
-              @component(config('systemtheme.group'))
-                @component(config('systemtheme.heading'), ['type' => 'h2', 'attributes' => ['class' => 'f']])
+              @component(component_path('group'))
+                @component(component_path('heading'), ['type' => 'h2', 'attributes' => ['class' => 'f']])
                   Хранение файла
                 @endcomponent
 
-                @component(config('systemtheme.description'))
+                @component(component_path('description'))
                   <p>
                     Загружаемые файлы можно скачать без публикации. Но каждому
                     загружаемому файлу присваивается уникальное труднозапоминаемое имя.
@@ -141,14 +145,14 @@
                 @endcomponent
 
                 {{-- Input - Direct file link --}}
-                @component(config('systemtheme.linkoutput'), ['open' => true, 'copy' => true, 'attributes' => ['value' => \Storage::url($file->path), 'placeholder' => 'Прямая ссылка для загрузки файла', 'readonly' => true, 'id' => 'filepath']])
+                @component(component_path('linkoutput'), ['open' => true, 'copy' => true, 'attributes' => ['value' => \Storage::url($file->path), 'placeholder' => 'Прямая ссылка для загрузки файла', 'readonly' => true, 'id' => 'filepath']])
                   @slot('label')
                     Прямая ссылка на оригинальный файл
                   @endslot
                 @endcomponent
 
                 {{-- Disk / Storage --}}
-                @component(config('systemtheme.staticvalue'))
+                @component(component_path('staticvalue'))
                   @slot('label')
                     Путь к хранилищу (<b>{{ $file->disk }}</b>)
                   @endslot
@@ -157,7 +161,7 @@
                 @endcomponent
 
                 {{-- Input - Relative file path --}}
-                @component(config('systemtheme.linkoutput'), ['copy' => true, 'attributes' => ['value' => $file->path, 'placeholder' => 'Путь к файлу относительно хранилища', 'readonly' => true]])
+                @component(component_path('linkoutput'), ['copy' => true, 'attributes' => ['value' => $file->path, 'placeholder' => 'Путь к файлу относительно хранилища', 'readonly' => true]])
                   @slot('label')
                     Путь к файлу относительно хранилища
                   @endslot
@@ -166,18 +170,18 @@
             @endcomponent
           @endcomponent
 
-          @component(config('systemtheme.zone'), ['type' => 'additional', 'class' => 'padding_left_small@s'])
-            @component(config('systemtheme.groups'))
+          @component(component_path('zone'), ['type' => 'additional', 'class' => 'padding_left_small@s'])
+            @component(component_path('groups'))
 
               {{-- Group - Additional --}}
-              @component(config('systemtheme.group'))
-                @component(config('systemtheme.heading'), ['type' => 'h2'])
+              @component(component_path('group'))
+                @component(component_path('heading'), ['type' => 'h2'])
                   Дополнительные сведения
                 @endcomponent
 
                 {{-- Cover --}}
                 @if (in_array($file->mime, config('file.supported_thumbnails')))
-                  @component(config('systemtheme.filecover'), ['attributes' => ['src' => \Storage::url($file->path)]])
+                  @component(component_path('file_cover'), ['attributes' => ['src' => \Storage::url($file->path)]])
                     @slot('label')
                       Миниатюра файла
                     @endslot
@@ -185,7 +189,7 @@
                 @endif
 
                 {{-- Upload date --}}
-                @component(config('systemtheme.staticvalue'))
+                @component(component_path('staticvalue'))
                   @slot('label')
                     Дата загрузки
                   @endslot
@@ -195,7 +199,7 @@
 
                 {{-- User --}}
                 @isset($file->user_id)
-                  @component(config('systemtheme.staticvalue'))
+                  @component(component_path('staticvalue'))
                     @slot('label')
                       Пользователь
                     @endslot
@@ -206,7 +210,7 @@
 
                 {{-- Extension --}}
                 @isset($file->extension)
-                  @component(config('systemtheme.staticvalue'))
+                  @component(component_path('staticvalue'))
                     @slot('label')
                       Расширение
                     @endslot
@@ -216,7 +220,7 @@
                 @endisset
 
                 {{-- MIME --}}
-                @component(config('systemtheme.staticvalue'))
+                @component(component_path('staticvalue'))
                   @slot('label')
                     Тип MIME
                   @endslot
@@ -225,7 +229,7 @@
                 @endcomponent
 
                 {{-- Modifications --}}
-                @component(config('systemtheme.staticvalue'))
+                @component(component_path('staticvalue'))
                   @slot('label')
                     Модификаций:
                   @endslot

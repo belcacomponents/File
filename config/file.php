@@ -4,31 +4,8 @@ return [
     // TODO контроллеры, обработчики, маршруты, ограничения БД и т.п.
     'repository' => Belca\File\Repositories\FileRepositoryEloquent::class,
 
-    // Представления
-    'index_view' => 'belca-file::index',
-
-    'create_view' => 'belca-file::create',
-
-    'edit_view' => 'belca-file::edit',
-
-    'show_view' => 'belca-file::show',
-
-    'delete_view' => 'belca-file::delete',
-
-    'modification_index_view' => 'belca-file::modification.index',
-
-    'modification_create_view' => 'belca-file::modification.create',
-
-    'modification_replace_view' => 'belca-file::modification.replace',
-
-    'modification_edit_view' => 'belca-file::modification.edit',
-
-    'modification_delete_view' => 'belca-file::modification.delete',
-
-    'modification_show_view' => 'belca-file::modification.show',
-
     // Components | Includes
-
+    // TODO в системную тему
     'alerts_component' => 'belca-file::components.alerts',
 
     'list_component' => 'belca-file::components.list',
@@ -42,28 +19,10 @@ return [
     // Поддерживаемые типы миниатюр - файлы, которые могут отображаться в браузере
     'supported_thumbnails' => ['image/jpeg', 'image/png', 'image/svg'],
 
-    // Редиректы при совершении действий (имена маршрутов)
-    'store_redirect' => 'files.edit',
-
-    // Переадресация при ошибке
-    'store_error_redirect' => 'files.store',
-
-    'update_redirect' => 'files.edit',
-
-    'destroy_redirect' => 'files.index',
-
-    // Ошибка при удалении
-    'destroy_error_redirect' => 'files.index',
-
-    'modification_store_redirect' => 'files.modifications.edit',
-
-    'modification_update_redirect' => 'files.modifications.update',
-
-    'modification_destroy_redirect' => 'files.modifications.destroy',
-
-    'modification_overwrite_redirect' => 'files.modifications.overwrite',
 
     // Контроллеры
+    // TODO сделать статическими и часть контроллеров должны быть расширяемые
+    // Либо весь пакет можно заменить
     'index_method' => '\Belca\File\Http\Controllers\FileController@index',
 
     'create_method' => '\Belca\File\Http\Controllers\FileController@create',
@@ -84,7 +43,7 @@ return [
     'url_prefix_download' => 'download',
 
     // Middlewares
-    // Посредники загрузки файлов
+    // Посредники скачивания файлов
     'download_middleware' => ['web'],
 
     // Посредники управления файлами: веб, авторизованные, роли и определенные пользователи
@@ -96,7 +55,7 @@ return [
     // Ограничения по загрузке файлов
     'allowed_file_types' => [],
 
-    'max_filesize' => 9999999,
+    'max_filesize' => 99999999,
 
     // Ограничения по slug (исключения)
 

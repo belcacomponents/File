@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Belca\FileHandler\FileHandler;
 use Belca\GeName\GeName;
+use Belca\File\Http\Services\FileService;
 
 /**
  * Управление модификациями файлов.
@@ -68,6 +69,8 @@ class ModificationController //extends AnotherClass
         $this->redirects = Config::getConfigArrayByConfigKeys($this->redirectConfig);*/
 
         $this->filenamePattern = config('file.filename_pattern');
+
+        $this->service = new FileService($files);
     }
 
     public function index(Request $request, $id = null)
@@ -123,48 +126,31 @@ class ModificationController //extends AnotherClass
 
     public function store(Request $request, $id)
     {
-        $fileinfo = [
-            'filename' => $request->file('file')->getClientOriginalName(),
-            'title' => pathinfo($request->file('file')->getClientOriginalName(), PATHINFO_FILENAME),
-            'mime' => $request->file('file')->getMimeType(),
-            'extension' => $request->file('file')->clientExtension() ?? pathinfo($request->file('file')->getClientOriginalName(), PATHINFO_EXTENSION),
-        ];
+        $file = $this->service->createFile(
+            $this->disk,
+            $this->filenamePattern,
+            $request->file('file'),
+            $request->input(),
+            config('filehandler.handlers'), // Handlers
+            config('filehandler.rules'),    // Handler rules
+            $id,                            // Parent
+            1                               // Author
+        );
 
-        $disk = $this->disk;
-        $directory = Storage::disk($disk)->getAdapter()->getPathPrefix();
-
-        $gename = new GeName();
-        $gename->setPattern($this->filenamePattern);
-        $gename->setInitialData([
-            'mime' => $fileinfo['mime'],
-            'extension' => $fileinfo['extension'],
-            'filename' => $fileinfo['filename'],
-        ]);
-        $gename->setDirectory($directory);
-        $filename = $gename->generateName();
-
-        // TODO здесь либо отдельный обработчик, либо отдельные настройки
-        $fileHandler = new FileHandler(config('filehandler.handlers'), config('filehandler.rules'));
-        $fileHandler->setOriginalFile($request->file('file')->getPathName(), $fileinfo);
-        $fileHandler->setDirectory($directory);
-
-        if (! $fileHandler->save($filename)) {
-            return redirect()->route($this->redirects['store_error'])->with(['status' => 'notSaved', 'file' => $fileinfo]);
+        if (empty($file)) {
+            return redirect()->route($this->redirects['store_error'])->with([
+                'active' => 'save',
+                'status' => false,
+                'id' => $id,
+            ]);
         }
 
-        $basicFileinfo = $fileHandler->getBasicFileProperties();
-        $additionalFileinfo = $fileHandler->getAdditionalFileProperties();
-
-        $systemInfo = [
-            'disk' => $disk,
-            'author_id' => 1,
-            'path' => $filename,
-            'parent_id' => $id,
-        ];
-
-        $file = $this->files->createWithGuardedFields(array_merge($request->input(), $fileinfo, $systemInfo, $basicFileinfo, ['options' => $additionalFileinfo]));
-
-        return redirect()->route($this->redirects['store'], $file->id)->with(['status' => 'saved', 'file' => $file]);
+        return redirect()->route($this->redirects['store'], $file->id)->with([
+            'active' => 'save',
+            'status' => true,
+            'id' => $id,
+            'data' => $file,
+        ]);
     }
 
     /**
@@ -174,7 +160,7 @@ class ModificationController //extends AnotherClass
      * открыть страницу загрузки замены файла.
      *
      * @param  integer $id
-     * @return
+     * @return View
      */
     public function edit($id)
     {
@@ -208,29 +194,32 @@ class ModificationController //extends AnotherClass
         // В зависимости от настроек выполняется обработка или нет. По умолчанию нет
     }
 
-    public function delete($id)
-    {
-        // Открывает страницу удаления модификации
-    }
-
     /**
      * Удаляет указанный файл (модификацию).
      *
-     * @param  Request $request
-     * @param  integer $id      
+     * @param  Request   $request
+     * @param  integer   $id
      * @return Illuminate\Http\RedirectResponse
      */
     public function destroy(Request $request, $id)
     {
-        $file = $this->files->find($id);
+        $result = $this->service->deleteFileWithModifications($id);
 
-        if (empty($file)) {
-            return redirect()->route($this->redirects['destroy_error'])->with(['alert' => ['status' => 'noFile', 'id' => $id]]);
+        $info = [
+            'alert' => [
+                'action' => 'delete',
+                'id' => $id,
+            ],
+        ];
+
+        $info['status'] = ! empty($result);
+
+        if (! empty($result)) {
+            $info['data'] = $result;
         }
 
-        Storage::disk($file->disk)->delete($file->path);
-        $file->delete();
+        $route = empty($result) ? $this->redirects['destroy_error'] : $this->redirects['destroy'];
 
-        return redirect()->route($this->redirects['destroy'])->with(['alert' => ['status' => 'deleted', 'file' => $file]]);
+        return redirect()->route($route)->with($info);
     }
 }

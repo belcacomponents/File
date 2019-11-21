@@ -1,6 +1,6 @@
 {{-- /resources/views/components/list.blade.php --}}
 {{-- List - displays a list of files --}}
-@component(config('systemtheme.entity-list'))
+@component(config('system_theme.entity-list'))
   @if (isset($files) && $files->count() > 0)
     @foreach ($files as $item)
       @component(config('systemtheme.thumbnail'), ['link' => route('files.edit', $item->id), 'title' => $item->title])

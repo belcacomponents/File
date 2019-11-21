@@ -2,7 +2,7 @@
 
 namespace Belca\File;
 
-use Illuminate\Support\ServiceProvider;
+use Belca\Support\ServiceProvider;
 use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\Facades\View;
 use Belca\File\Contracts\FileRepository;
@@ -42,17 +42,26 @@ class FileServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->mergeConfigFrom(
+        $this->recurciveReplaceConfigFrom(
             __DIR__.'/../config/file.php', 'file'
         );
 
-        $this->mergeConfigFrom(
-            __DIR__.'/../config/filehandler.php', 'filehandler'
+        $this->recurciveReplaceConfigFrom(
+            __DIR__.'/../config/file_handler.php', 'file_handler'
         );
 
         // Добавляем новые компоненты к теме
-        $this->mergeConfigFrom(
-            __DIR__.'/../config/systemtheme.php', 'systemtheme'
+        $this->recurciveReplaceConfigFrom(
+            __DIR__.'/../config/system_theme.php', 'system_theme'
+        );
+
+        $this->recurciveReplaceConfigFrom(
+            __DIR__.'/../config/controlpanel.php', 'controlpanel'
+        );
+
+        // Добавляет новый маршрут
+        $this->recurciveReplaceConfigFrom(
+            __DIR__.'/../config/routes.php', 'routes'
         );
 
         $this->app->singleton(FileRepository::class, config('file.repository'));

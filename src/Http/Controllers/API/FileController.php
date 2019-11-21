@@ -1,6 +1,6 @@
 <?php
 
-namespace Belca\File\Http\Controllers;
+namespace Belca\File\Http\Controllers\API;
 
 use Belca\File\Contracts\FileRepository;
 use Belca\File\Contracts\FileController as FileControllerInterface;
@@ -15,26 +15,20 @@ use Belca\File\Http\Services\FileService;
 /**
  * Базовая загрузка файлов и управление ими.
  */
-class FileController
+class FileController// implements FileControllerInterface
 {
+
     protected $disk = 'public';
 
     protected $filenamePattern;
-
-    /**
-     * Сервис для работы с файлами.
-     *
-     * @var \Belca\File\Http\Services\FileService;
-     */
-    protected $service;
 
     public function __construct(FileRepository $files)
     {
         $this->files = $files;
 
-        $this->filenamePattern = config('file.filename_pattern');
-
         $this->service = new FileService($files);
+
+        $this->filenamePattern = config('file.filename_pattern');
     }
 
     /**
@@ -46,19 +40,7 @@ class FileController
      */
     public function index(Request $request)
     {
-        return view('belca-file::files.index')->with([
-            'files' => $this->service->getFiles(true, $request->input()),
-        ]);
-    }
-
-    /**
-     * Отображает форму загрузки нового файла.
-     *
-     * @return View
-     */
-    public function create()
-    {
-        return view('belca-file::files.create');
+        return $this->service->getFiles(true, $request->input());
     }
 
     /**
@@ -95,14 +77,14 @@ class FileController
         $gename->setDirectory($directory);
         $filename = $gename->generateName();
 
-        // Конфигурация хранится в настройках config/file_handler.php
-        $fileHandler = new FileHandler(config('file_handler.handlers'), config('file_handler.rules'), config('file_handler.scripts'));
+        // Конфигурация хранится в настройках config/filehandler.php
+        $fileHandler = new FileHandler(config('filehandler.handlers'), config('filehandler.rules'), config('filehandler.scripts'));
         $fileHandler->setOriginalFile($request->file('file')->getPathName(), $fileinfo);
         $fileHandler->setDirectory($directory);
         $fileHandler->setHandlingScriptByScriptName('user-device');
 
         if (! $fileHandler->save($filename)) {
-            return redirect()->route('file.store_error_redirect')->with(['alert' => ['status' => 'fileNotSaved', 'file' => $fileinfo]]);
+            return response()->json(['alert' => ['status' => 'fileNotSaved', 'file' => $fileinfo]]);
         }
 
         // Со страницы формы может быть передан измененный вариант обработки скрипта
@@ -156,34 +138,21 @@ class FileController
             $this->files->createModifications($file->id, $files);
         }
 
-        return redirect()->route('file_tools.files.edit', $file->id)->with(['status' => 'saved', 'file' => $file]);
+        return $file;
     }
 
     /**
      * Отображает страницу с файлом для загрузки или отображения, также
      * содержит сведения о модификациях.
      *
-     * @param  integer $id
-     * @return View
+     * @param  integer $id ID файла
+     * @return
      */
     public function show($id)
     {
-        $file = $this->service->getFileWithModifications($id);
+        $file = $this->files->findWithModifications($id);
 
-        return view('belca-file::files.show', compact('file'));
-    }
-
-    /**
-     * Отображает форму редактирования данных файла.
-     *
-     * @param  integer $id
-     * @return View
-     */
-    public function edit($id)
-    {
-        $file = $this->service->getFile($id, true);
-
-        return view('belca-file::files.edit', compact('file'));
+        return $file;
     }
 
     /**
@@ -191,51 +160,47 @@ class FileController
      * После обновления информации выполняется перенаправление на другую страницу
      * с возвратом статуса о действии.
      *
-     * @param  FileRequest   $request
-     * @param  integer       $id
+     * @param  FileRequest $request Данные формы
+     * @param  integer     $id      ID файла
      * @return Illuminate\Http\RedirectResponse
      */
     public function update(FileRequest $request, $id)
     {
-        $file = $this->service->updateFileInfo($id, $request->input());
+        $file = $this->files->update($request->input(), $id);
 
-        return redirect()->route('file_tools.files.edit', compact('file'))->with([
-            'alert' => [
-                'action' => 'update',
-                'status' => true,
-                'id' => $id,
-                'data' => $file,
-            ],
-        ]);
+        return $file;
     }
 
     /**
-     * Удаляет файл и его модификации. После завершения удаления файлов
-     * перенаправляет на другую страницу и возвращает статус удаления.
+     * Удаляет файл, удаляет модификации, вызывает дополнительную обработку
+     * данных, например, удаление связей и удаляет данные из БД.
+     * После завершения удаления файлов перенаправляет на другую страницу
+     * и возвращает статус удаления.
      *
-     * @param  FileRequest  $request
-     * @param  integer      $id
+     * @param  FileRequest $request Данные формы
+     * @param  integer $id          ID файла
      * @return Illuminate\Http\RedirectResponse
      */
     public function destroy(FileRequest $request, $id)
     {
-        $result = $this->service->deleteFileWithModifications($id);
+        // Изменение состояний связанных объектов - отдельный класс
+        // Удаление файлов - отдельный класс, т.к. нужно удалять связанные данные из других таблиц
+        // Можно удаление пустых папок - в предыдущем
 
-        $info = [
-            'alert' => [
-                'action' => 'delete',
-                'id' => $id,
-            ],
-        ];
+        $files = $this->files->findWithModifications($id);
 
-        $info['status'] = ! empty($result);
-
-        if (! empty($result)) {
-            $info['data'] = $result;
+        if (empty($files)) {
+            return response()->json(['alert' => ['status' => 'noFiles', 'id' => $id]]);
         }
 
-        $route = empty($result) ? 'file_tools.files.edit' : 'file_tools.files.index';
+        $originalFile = current($files);
 
-        return redirect()->route($route)->with($info);
+        foreach ($files as $file) {
+            Storage::disk($file->disk)->delete($file->path);
+        }
+
+        $deleted = $this->files->deleteWithModifications($id);
+
+        return response()->json(['alert' => ['status' => 'deleted', 'file' => $originalFile, 'count' => $deleted]]);
     }
 }

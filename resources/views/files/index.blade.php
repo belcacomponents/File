@@ -1,41 +1,53 @@
-{{-- /resources/views/index.blade.php --}}
-{{-- Страница со списком файлов --}}
-@extends(config('systemtheme.app'))
+@extends(component_path('app'))
 
 @section('title', __('belca-file::files.files'))
 
 @section('content')
   {{-- Workspace --}}
-  @component(config('systemtheme.workspace'))
+  @component(component_path('workspace'))
     {{-- Breadcrumbs --}}
-    @include(config('systemtheme.breadcrumbs'), ['breadcrumbs' => [['link' => '/system', 'label' => 'Главная'], ['label' => __('belca-file::files.files')]]])
+    @include(component_path('breadcrumbs'), [
+      'breadcrumbs' => [
+        ['link' => '/system', 'label' => 'Главная'],
+        ['label' => __('belca-file::files.files')]
+      ]
+    ])
 
     {{-- Container --}}
-    @component(config('systemtheme.container'))
+    @component(component_path('container'))
 
       {{-- Heading --}}
-      @component(config('systemtheme.heading'))
+      @component(component_path('heading'))
         @lang('belca-file::files.files')
       @endcomponent
 
       {{-- Form --}}
-      @component(config('systemtheme.form'), ['attributes' => ['action' => route('files.index'), 'method' => 'get']])
+      @component(component_path('form'), ['attributes' => ['action' => route('file_tools.files.index'), 'method' => 'get']])
         {{-- Control panel --}}
-        @component(config('systemtheme.control-panel'))
+        @component(component_path('control_panel'))
           {{-- Section: Buttons --}}
           @section('buttons')
-            @component(config('systemtheme.buttonlink'), ['styleModifier' => 'primary', 'attributes' => ['href' => route('files.create')]])
+            @component(component_path('link_button'), [
+              'type' => 'primary',
+              'attributes' => [
+                'href' => route('file_tools.files.create')
+              ]
+            ])
               @lang('belca-file::files.upload_file')
             @endcomponent
 
             {{-- TODO добавить мультизагрузку
-            @component(config('systemtheme.button'), ['attributes' => ['type' => 'submit']])
+            @component(component_path('button'), ['attributes' => ['type' => 'submit']])
               Мультизагрузка
             @endcomponent
             --}}
           @show
 
-          @component(config('systemtheme.buttonlink'), ['attributes' => ['href' => route('files.mods.index')]])
+          @component(component_path('link_button'), [
+            'attributes' => [
+              'href' => route('file_tools.mods.index')
+            ]
+          ])
             @lang('belca-file::files.modifications')
           @endcomponent
 
@@ -67,11 +79,11 @@
         {{-- Files --}}
         <div class="uk-margin">
           {{-- List of files --}}
-          @component(config('systemtheme.entity-list'))
+          @component(component_path('entity-list'), ['count' => 5])
             @if (isset($files) && $files->count() > 0)
               @foreach ($files as $item)
-                @component(config('systemtheme.thumbnail'), ['link' => route('files.edit', $item->id), 'title' => $item->title])
-                  @include(config('file.inside_thumbnail_component'), ['link' => route('files.edit', $item->id), 'src' => \Storage::url($item->path), 'title' => $item->title, 'mime' => $item->mime])
+                @component(component_path('thumbnail'), ['link' => route('file_tools.files.edit', $item->id), 'title' => $item->title])
+                  @include(config('file.inside_thumbnail_component'), ['link' => route('file_tools.files.edit', $item->id), 'src' => \Storage::url($item->path), 'title' => $item->title, 'mime' => $item->mime])
                 @endcomponent
               @endforeach
             @else
@@ -82,9 +94,11 @@
       @show
 
       {{-- Pagination --}}
-      <div class="uk-margin">
-        {{ $files->links(config('systemtheme.pagination')) }}
-      </div>
+      @if (isset($files) )
+        <div class="uk-margin">
+          {{-- {{ $files->links(component_path('pagination')) }} --}}
+        </div>
+      @endif
     @endcomponent
   @endcomponent
 @endsection

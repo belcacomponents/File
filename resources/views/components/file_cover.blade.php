@@ -1,5 +1,3 @@
-{{-- /resources/views/components/filecover.blade.php --}}
-{{-- File cover --}}
 @isset($attributes['src'])
   <div class="uk-margin">
     @isset($label)

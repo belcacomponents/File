@@ -1,31 +1,40 @@
-{{-- /resources/views/index.blade.php --}}
-{{-- Страница со списком файлов --}}
 {{-- TODO Шаблон для темы по умолчанию. Должен расширяться вставкой секциями или пушем --}}
-@extends(config('systemtheme.app'))
+@extends(component_path('app'))
 
 @section('title', 'Модификации файлов')
 
 @section('content')
   {{-- Workspace --}}
-  @component(config('systemtheme.workspace'))
+  @component(component_path('workspace'))
     {{-- Breadcrumbs --}}
-    @include(config('systemtheme.breadcrumbs'), ['breadcrumbs' => [['link' => '/system', 'label' => 'Главная'], ['link' => route('files.index'), 'label' => 'Файлы'], ['label' => 'Модификации файлов']]])
+    @include(component_path('breadcrumbs'), [
+      'breadcrumbs' => [
+        ['link' => '/system', 'label' => 'Главная'],
+        ['link' => route('file_tools.files.index'), 'label' => 'Файлы'],
+        ['label' => 'Модификации файлов']
+      ]
+    ])
 
     {{-- Container --}}
-    @component(config('systemtheme.container'))
+    @component(component_path('container'))
 
       {{-- Heading --}}
-      @component(config('systemtheme.heading'))
+      @component(component_path('heading'))
         Модификации файлов
       @endcomponent
 
       {{-- Form --}}
-      @component(config('systemtheme.form'), ['attributes' => ['action' => route('files.index'), 'method' => 'get']])
+      @component(component_path('form'), [
+        'attributes' => [
+          'action' => route('file_tools.mods.index'),
+          'method' => 'get'
+        ]
+      ])
         {{-- Control panel --}}
-        @component(config('systemtheme.control-panel'))
+        @component(component_path('control_panel'))
 
           {{--
-          @component(config('systemtheme.button'), ['attributes' => ['type' => 'submit']])
+          @component(component_path('button'), ['attributes' => ['type' => 'submit']])
             Мультизагрузка
           @endcomponent
           --}}
@@ -51,11 +60,11 @@
 
       {{-- Files --}}
       <div class="uk-margin">
-        @component(config('systemtheme.entity-list'))
+        @component(component_path('entity-list'))
           @if (isset($files) && $files->count() > 0)
             @foreach ($files as $item)
-              @component(config('systemtheme.thumbnail'), ['link' => route('files.mods.edit', $item->id), 'title' => $item->title])
-                @include(config('file.inside_thumbnail_component'), ['link' => route('files.mods.edit', $item->id), 'src' => \Storage::url($item->path), 'title' => $item->title, 'mime' => $item->mime])
+              @component(component_path('thumbnail'), ['link' => route('file_tools.mods.edit', $item->id), 'title' => $item->title])
+                @include(config('file.inside_thumbnail_component'), ['link' => route('file_tools.mods.edit', $item->id), 'src' => \Storage::url($item->path), 'title' => $item->title, 'mime' => $item->mime])
               @endcomponent
             @endforeach
           @else
@@ -66,7 +75,7 @@
 
       {{-- Pagination --}}
       <div class="uk-margin">
-        {{ $files->links(config('systemtheme.pagination')) }}
+        {{ $files->links(component_path('pagination')) }}
       </div>
     @endcomponent
   @endcomponent
