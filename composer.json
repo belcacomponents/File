@@ -1,6 +1,6 @@
 {
     "name": "diossystem/file",
-    "description": "The File component",
+    "description": "The File component.",
     "type": "library",
     "license": "MIT",
     "authors": [
@@ -9,16 +9,11 @@
             "email": "dmitrochenkooleg@gmail.com"
         }
     ],
-    "requires": {
-       "php": "7 - 8",
-       "illuminate/database": "5 - 8",
-       "illuminate/support": "5 - 8",
-       "belca/filehandler": "dev-master",
-       "belca/gename": "dev-master",
-       "belca/support": "dev-master",
-       "belca/finfo": "dev-master",
-       "belca/fgen": "dev-master",
-       "dios/simple-image-handler": "dev-master"
+    "require": {
+        "php": "7 - 8",
+        "illuminate/database": "5 - 8",
+        "illuminate/support": "5 - 8",
+        "belca/support-constants": "1.*"
     },
     "extra": {
         "laravel": {
