@@ -1,6 +1,6 @@
 {
     "name": "diossystem/file",
-    "description": "",
+    "description": "The File component",
     "type": "library",
     "license": "MIT",
     "authors": [
