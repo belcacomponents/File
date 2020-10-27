@@ -1,9 +1,9 @@
 <?php
 
+use Dios\System\File\FileSource;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
-use Belca\File\Enum\FileUploadSource;
 
 class CreateFilesTable extends Migration
 {
@@ -24,7 +24,7 @@ class CreateFilesTable extends Migration
            * Например, загружен с ПК (USER_DEVICE), сгенерирован системой (SYSTEM),
            * загружен с интернета (INTERNET), скопирован на сервере (COPY) и т.д.
            */
-          $table->string('source')->default(FileUploadSource::USER_DEVICE)->index();
+          $table->string('source')->default(FileSource::DEFAULT)->index();
 
           /**
            * Родительский файл.
@@ -57,7 +57,7 @@ class CreateFilesTable extends Migration
            * Соответствует значению конфигурационного файла
            * config/filesystems.php в Laravel
            */
-          $table->string('disk', 32)->default('public');
+          $table->string('disk')->default('public');
 
           /**
            * MimeType.
@@ -134,14 +134,14 @@ class CreateFilesTable extends Migration
           /**
            * Создатель (загрузчик) файла.
            */
-          //$table->unsignedInteger('author_id')->index();
+          $table->unsignedInteger('author_id')->index();
 
           /**
            * Достук к файлу.
            *
            * Доступные файлы можно скачивать по прямой ссылке из параметра slug.
            */
-          $table->boolean('published')->default(false)->index();
+          $table->boolean('active')->default(false)->index();
 
           /**
            * ЧПУ для прямых ссылок для скачивания.
@@ -149,15 +149,6 @@ class CreateFilesTable extends Migration
            * Возможно только одна активная ссылка (работает совместно с published).
            */
           $table->string('slug')->nullable()->index();
-
-          /**
-           * Категория файла.
-           *
-           * Объединяет файлы по группам для упрощения поиска, фильтра и выбора файлов,
-           * а также для создания иерархической структуры файлов.
-           * Категория файла равносильна каталогу, альбому.
-           */
-          $table->unsignedInteger('category_id')->nullable()->index(); // TODO добавляется вместе с категориями
 
           /**
            * Параметр файла.
