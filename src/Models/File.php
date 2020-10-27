@@ -1,87 +1,71 @@
 <?php
 
-namespace Belca\File\Models;
+namespace Dios\System\File\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use EloquentFilter\Filterable;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * Keeps data of a file and its modifications.
+ */
 class File extends Model
 {
-    use Filterable;
-
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
     protected $fillable = [
         'title',
         'description',
-        'slug',
-        'published',
-        'category_id'
     ];
 
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
     protected $casts = [
         'options' => 'array',
     ];
 
-    // TODO скрыты все кроме стандартных полей title description path
-    //protected $hidden = ['slug', 'name', 'published'];
-
     /**
-     * Возвращает класс фильтра.
-     *
-     * @return string
+     * Returns modifications of the file.
      */
-    public function modelFilter()
+    public function modifications(): HasMany
     {
-        return $this->provideFilter(FileFilter::class);
+        return $this->hasMany(static::class, 'parent_id', 'id');
     }
 
     /**
-     * Возвращает экземпляры модификаций файла.
+     * Returns a parent file.
      */
-    public function modifications()
+    public function parent(): BelongsTo
     {
-        return $this->hasMany(self::class, 'parent_id', 'id');
+        return $this->belongsTo(static::class, 'id');
     }
 
     /**
-     * Возвращает родительский экземпляр файла.
+     * Returns only original (parent) files.
      */
-    public function parent()
+    public function scopeOriginal(Builder $query): Builder
     {
-        return $this->belongsTo(self::class, 'id');
-    }
-
-    /**
-     * Возвращает только родительские (оригинальные) файлы.
-     *
-     * @param  Illuminate\Database\Eloquent\Builder $query
-     * @return Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeOriginal($query)
-    {
-        return $query->where('parent_id', '0');
+        return $query->where('parent_id', 0);
     }
 
     /**
      * Условие отображения опубликованных файлов. Если $published - false,
      * то возвращает неопубликованные файлы.
      *
-     * @param  Illuminate\Database\Eloquent\Builder $query
-     * @param  boolean                              $query Состояние публикации
-     * @return Illuminate\Database\Eloquent\Builder
+     * @param Builder  $query
+     * @param boolean  $active
      */
-    public function scopePublished($query, $published = true)
+    public function scopeActive(Builder $query, bool $active = true): Builder
     {
-        return $query->where('published', $published);
+        return $query->where('active', $active);
     }
 
-    // TODO если это вынести в репозиторий, то здесь это потеряет смысл
-    public function setSlugAttribute($value)
-    {
-        $this->attributes['slug'] = str_slug($value, '-');
-    }
-
-    public function setPublishedAttribute($value)
-    {
-        $this->attributes['published'] = ($value) ? $value : false;
-    }
+    // TODO поиск по slug, типу файла, расширению, группе, источнику и всем полям файла
 }
