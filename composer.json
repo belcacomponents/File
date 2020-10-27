@@ -18,7 +18,7 @@
        "belca/support": "dev-master",
        "belca/finfo": "dev-master",
        "belca/fgen": "dev-master",
-       "dios/simple-image-handler": "dev-master",
+       "dios/simple-image-handler": "dev-master"
     },
     "extra": {
         "laravel": {
