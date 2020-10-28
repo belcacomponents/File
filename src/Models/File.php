@@ -23,7 +23,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $title A title of the file.
  * @property string|null $extension An extention of the file.
  * @property string|null $description A description of the file.
- * @property bool $active A state of a file accessibility.
+ * @property bool $active A state of activity of the file.
+ * @property bool $published A state of a file accessibility from the Web.
  * @property string|null $slug A slug to download the file.
  * @property string $options
  */

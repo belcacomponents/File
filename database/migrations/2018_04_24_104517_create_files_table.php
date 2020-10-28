@@ -137,11 +137,18 @@ class CreateFilesTable extends Migration
           $table->unsignedInteger('author_id')->index();
 
           /**
+           * Активность файла.
+           *
+           * Только активные файлы могут быть получены для пользователя.
+           */
+          $table->boolean('active')->default(true)->index();
+
+          /**
            * Достук к файлу.
            *
            * Доступные файлы можно скачивать по прямой ссылке из параметра slug.
            */
-          $table->boolean('active')->default(false)->index();
+          $table->boolean('published')->default(false)->index();
 
           /**
            * ЧПУ для прямых ссылок для скачивания.
