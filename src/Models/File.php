@@ -9,6 +9,23 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Keeps data of a file and its modifications.
+ *
+ * @property int $id An ID of the file.
+ * @property string $source A source of the file.
+ * @property int|null $parent_id A parent file.
+ * @property string $path A relative path to the file.
+ * @property int $size Size of the file.
+ * @property string $disk A disk where is the file.
+ * @property string $mime MIME-type of the file.
+ * @property string $driver A driver that modified the file.
+ * @property string $handler A method or a way of modification of the file.
+ * @property string $handler_mode A mode of the method (the handler) of the file.
+ * @property string $title A title of the file.
+ * @property string|null $extension An extention of the file.
+ * @property string|null $description A description of the file.
+ * @property bool $active A state of a file accessibility.
+ * @property string|null $slug A slug to download the file.
+ * @property string $options
  */
 class File extends Model
 {
