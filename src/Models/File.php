@@ -74,16 +74,42 @@ class File extends Model
     }
 
     /**
-     * Условие отображения опубликованных файлов. Если $published - false,
-     * то возвращает неопубликованные файлы.
+     * Returns files which has a slug.
+     */
+    public function scopeHasSlug(Builder $query): Builder
+    {
+        return $query->whereNotNull('slug');
+    }
+
+    /**
+     * Returns active files.
      *
-     * @param Builder  $query
-     * @param boolean  $active
+     * @param Builder $query
+     * @param boolean $active A state of activity of files.
      */
     public function scopeActive(Builder $query, bool $active = true): Builder
     {
         return $query->where('active', $active);
     }
 
+    /**
+     * Returns published files.
+     *
+     * @param Builder $query
+     * @param boolean $published A publication state of files.
+     */
+    public function scopePublished(Builder $query, bool $published = true): Builder
+    {
+        return $query->where('published', $published);
+    }
+
+    /**
+     * Returns really published files. They are active published files
+     * which has a slug.
+     */
+    public function scopeReallyPublished(Builder $query): Builder
+    {
+        return $query->active()->published()->hasSlug();
+    }
     // TODO поиск по slug, типу файла, расширению, группе, источнику и всем полям файла
 }
