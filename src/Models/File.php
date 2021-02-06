@@ -179,4 +179,15 @@ class File extends Model
     {
         return $this->hasLoadedModifications() && $this->modifications->count();
     }
+
+    /**
+     * Initializes and returns a collection with the given files.
+     *
+     * @param  array|File[] $models
+     * @return FileCollection
+     */
+    public function newCollection(array $models = []): FileCollection
+    {
+        return new FileCollection($models);
+    }
 }
