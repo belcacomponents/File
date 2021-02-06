@@ -111,5 +111,72 @@ class File extends Model
     {
         return $query->active()->published()->hasSlug();
     }
-    // TODO поиск по slug, типу файла, расширению, группе, источнику и всем полям файла
+
+    /**
+     * Returns files by the given slug.
+     *
+     * @param  Builder $query
+     * @param  string  $slug
+     * @return Builder
+     */
+    public function scopeSlug(Builder $query, string $slug): Builder
+    {
+        return $query->where('slug', $slug);
+    }
+
+    /**
+     * Returns files by the given driver.
+     *
+     * @param  Builder $query
+     * @param  string  $driver
+     * @return Builder
+     */
+    public function scopeDriver(Builder $query, string $driver): Builder
+    {
+        return $query->where('driver', $driver);
+    }
+
+    /**
+     * Returns files by the given handler.
+     *
+     * @param  Builder $query
+     * @param  string  $handler
+     * @return Builder
+     */
+    public function scopeHandler(Builder $query, string $handler): Builder
+    {
+        return $query->where('handler', $handler);
+    }
+
+    /**
+     * Returns files by the given handler mode.
+     *
+     * @param  Builder $query
+     * @param  string  $mode
+     * @return Builder
+     */
+    public function scopeHandlerMode(Builder $query, string $mode): Builder
+    {
+        return $query->where('handler_mode', $mode);
+    }
+
+    /**
+     * Checks whether the file has loaded modifications.
+     *
+     * @return bool
+     */
+    public function hasLoadedModifications(): bool
+    {
+        return $this->relationLoaded('modifications');
+    }
+
+    /**
+     * Checks whether the file has loaded related modifications.
+     *
+     * @return bool
+     */
+    public function hasModifications(): bool
+    {
+        return $this->hasLoadedModifications() && $this->modifications->count();
+    }
 }
